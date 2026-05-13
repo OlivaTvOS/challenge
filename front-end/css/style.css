@@ -48,13 +48,11 @@ a:hover{
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .menu{
     display: flex;
     gap: 40px;
     list-style: none;
 }
-
 .menu a{
     display: block;
     background-color: rgba(255,255,255,0.05);
@@ -66,7 +64,6 @@ a:hover{
     font-weight: 600;
     color: #d7f7ff;
 }
-
 .menu a:hover{
     background-color: var(--roxo);
     transform: translateY(-2px);
@@ -97,7 +94,84 @@ a:hover{
 }
 
 /* PAGINAS */
-
 .pagina{
     padding: 80px 60px;
+}
+
+/* CARDS INTEGRANTES */
+.integrantes{
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+}
+.card-integrante{
+    width: 350px;
+    min-height: 600px;
+    padding: 30px;
+    border-radius: 24px;
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    text-align: center;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+.card-integrante:hover{
+    transform: translateY(-8px);
+    box-shadow: 0 0 30px rgba(107,127,215,0.2);
+}
+.card-integrante img{
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    border: 3px solid var(--azul);
+}
+.card-integrante h2{
+    margin-bottom: 10px;
+}
+.card-integrante p{
+    color: #cfcfcf;
+    margin-bottom: 10px;
+}
+.links{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+.links a{
+    padding: 18px;
+    border-radius: 30px;
+    background-color: rgba(255,255,255,0.05);
+    transition: 0.3;
+}
+.links a:hover{
+    background-color: var(--roxo);
+    transform: translate(-2px);
+}
+.avatar-space{
+    height: 100px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* CARD CONTATO */
+.contato{
+    display: flex;
+    justify-content: center;
+}
+
+.card-contato{
+    width: 700px;
+    padding: 50px;
+    border-radius: 24px;
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
 }
