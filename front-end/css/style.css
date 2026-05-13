@@ -41,9 +41,9 @@ a:hover{
 /* NAVBAR */
 .navbar{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 25px 60px;
+    padding: 20px 0;
     background-color: rgba(45, 45, 42, 0.5);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -51,8 +51,26 @@ a:hover{
 
 .menu{
     display: flex;
-    gap: 30px;
+    gap: 40px;
     list-style: none;
+}
+
+.menu a{
+    display: block;
+    background-color: rgba(255,255,255,0.05);
+    padding: 14px 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.03);
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+    font-weight: 600;
+    color: #d7f7ff;
+}
+
+.menu a:hover{
+    background-color: var(--roxo);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(107,127,215,0.4);
 }
 
 /* HERO */
@@ -76,4 +94,10 @@ a:hover{
 }
 .hero-image{
     width: 400px;
+}
+
+/* PAGINAS */
+
+.pagina{
+    padding: 80px 60px;
 }
