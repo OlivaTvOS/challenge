@@ -13,14 +13,29 @@
     --preto: #000000;
     --grafite: #2D2D2A;
     --branco: #F5F5F5;
+    --azulRGB: 107, 127, 215;
+    --roxoRGB: 86, 3, 173;
+
 }
 
 /* BODY */
 body{
-    background-color: var(--preto);
-    color: var(--branco);
+    background-color: #000;
+    background-image:
+        radial-gradient(
+            circle at top left,
+            rgba(var(--roxoRGB),0.25),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at top right,
+            rgba(var(--azulRGB), 0.3),
+            transparent 30%
+        );
+    color: white;
+    min-height: 100vh;
+    overflow-x: hidden;
     font-family: 'Manrope', sans-serif;
-
 }
 
 /* TITULOS */
@@ -110,7 +125,7 @@ a:hover{
     min-height: 600px;
     padding: 30px;
     border-radius: 24px;
-    background-color: rgba(255,255,255,0.05);
+    background-color: rgba(15,15,20,0.7);
     border: 1px solid rgba(255,255,255,0.08);
     backdrop-filter: blur(10px);
     text-align: center;
@@ -165,13 +180,24 @@ a:hover{
 .contato{
     display: flex;
     justify-content: center;
+    text-align: center;
 }
-
 .card-contato{
     width: 700px;
     padding: 50px;
     border-radius: 24px;
-    background-color: rgba(255,255,255,0.05);
+    background-color: rgba(15,15,20,0.7);
     border: 1px solid rgba(255,255,255,0.08);
     backdrop-filter: blur(10px);
+}
+.card-contato h2{
+    margin-top: 20px;
+    margin-bottom: 40px;
+    color: #cfcfcf;
+    line-height: 1.6;
+}
+.card-contato p{
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
