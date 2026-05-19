@@ -21,6 +21,9 @@ public class Bot {
         System.out.println("╚════════════════════════════════════════════════╝\n");
 
         String nova_missao;
+
+        // Loop principal do sistema.
+        // Continua executando até o usuário escolher sair.
         do {
             System.out.println("\n========== ESCOLHA UMA MISSÃO PARA REALIZAR ==========\n");
 
@@ -40,6 +43,9 @@ public class Bot {
             System.out.println("Digite a categoria: ");
             String opcoes = sc.nextLine();
 
+
+        // Estrutura responsável por controlar
+        // as opções escolhidas pelo usuário no menu.
             switch (opcoes) {
                 case "1":
                     GerenciadorMissoes.imprimirTodasAsMissoes();
@@ -76,11 +82,13 @@ public class Bot {
 
         String entrada = sc.nextLine().trim();
 
+        // Verifica se a entrada contém apenas números.
         if (!entrada.matches("\\d+")) {
             System.out.println("Entrada inválida! Digite apenas números.");
             return;
         }
 
+        // Converte a String digitada para inteiro.
         int missaoID = Integer.parseInt(entrada);
 
         Missao missao = GerenciadorMissoes.getMissaoPorId(missaoID);
@@ -103,6 +111,7 @@ public class Bot {
             System.out.println("Missão cancelada.");
             return;
         }
+        // Converte a String digitada para inteiro.
         processarMissao(missao);
     }
 
@@ -112,6 +121,8 @@ public class Bot {
 
         switch (cat) {
             case "PLANTIO":
+                // Gera um índice aleatório baseado
+                // no tamanho do array de frases.
                 int plantioAleatorio = (int) (Math.random() * fa.getPlantio_cat().length);
                 System.out.println(fa.getPlantio_cat()[plantioAleatorio]);
 
@@ -124,7 +135,7 @@ public class Bot {
                 }
                 break;
             case "AGUA":
-                int aguaAleatorio = (int) (Math.random() * fa.getPlantio_cat().length);
+                int aguaAleatorio = (int) (Math.random() * fa.getAgua_cat().length);
                 System.out.println(fa.getAgua_cat()[aguaAleatorio]);
 
                 if (agua_total_semana < limite_agua) {
@@ -136,7 +147,7 @@ public class Bot {
                 }
                 break;
             case "ENERGIA":
-                int energiaAleatorio = (int) (Math.random() * fa.getPlantio_cat().length);
+                int energiaAleatorio = (int) (Math.random() * fa.getEnergia_cat().length);
                 System.out.println(fa.getEnergia_cat()[energiaAleatorio]);
 
                 if (energia_total_semana < limite_energia) {
@@ -148,7 +159,7 @@ public class Bot {
                 }
                 break;
             case "RECICLAGEM":
-                int reciclagemAleatorio = (int) (Math.random() * fa.getPlantio_cat().length);
+                int reciclagemAleatorio = (int) (Math.random() * fa.getReciclagem_cat().length);
                 System.out.println(fa.getReciclagem_cat()[reciclagemAleatorio]);
 
                 if (reciclagem_total_semana < limite_reciclagem) {

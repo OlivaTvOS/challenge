@@ -1,3 +1,5 @@
+// Classe responsável por armazenar
+// todas as frases motivacionais do sistema.
 public class FrasesArray {
     private final String[] plantio_cat = {
             "Cada árvore plantada é uma promessa ao futuro de nosso planeta.",
@@ -110,6 +112,9 @@ public class FrasesArray {
             "Reciclagem responsável é reciclagem que muda o mundo.",
             "Você é um agente ativo da economia circular do planeta!"
     };
+
+    // Getter utilizado para permitir acesso
+    // ao array privado de frases.
 
     public String[] getPlantio_cat() {
         return plantio_cat;

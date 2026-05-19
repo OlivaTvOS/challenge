@@ -1,4 +1,7 @@
 public class GerenciadorMissoes {
+
+    // Array principal contendo todas
+    // as missões disponíveis no sistema.
     public static final Missao[] MISSOES_DISPONIVEIS = {
             // ========== PLANTIO (IDs 1-5) ==========
             new Missao(1, "Plantar uma árvore", "PLANTIO",
@@ -58,6 +61,8 @@ public class GerenciadorMissoes {
 
     public static Missao[] getMissoesPorCategoria(String categoria) {
         int contador = 0;
+        // Conta quantas missões existem
+        // na categoria solicitada.
         for (Missao m : MISSOES_DISPONIVEIS) {
             if (m.getCategoria().equals(categoria.toUpperCase())) {
                 contador++;
@@ -66,6 +71,8 @@ public class GerenciadorMissoes {
 
         Missao[] resultado = new Missao[contador];
         int indice = 0;
+        // Preenche o novo array apenas
+        // com missões da categoria desejada.
         for (Missao m : MISSOES_DISPONIVEIS) {
             if (m.getCategoria().equals(categoria.toUpperCase())) {
                 resultado[indice] = m;
