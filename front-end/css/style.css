@@ -341,15 +341,17 @@ a:hover{
     content: "-";
 }
 .faq-card p{
+    font-size: 0.98rem;
     margin-top: 20px;
     line-height: 1.7;
     text-align: left;
     color: #d4d4d4;
+    padding-right: 90px;
 }
 .faq-emote{
     width: 90px;
     position: absolute;
-    bottom: 10px;
+    bottom: 20px;
     right: 10px;
     opacity: 0;
     transform: translateY(20px);
@@ -358,6 +360,132 @@ a:hover{
 .faq-card[open] .faq-emote{
     opacity: 0.85;
     transform: translateY(0);
+}
+
+/* CONHEÇA MAIS (TEXTO E CARDS ESTILO CARROSSEL)*/
+.about-section {
+    width: 100%;
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    gap: 40px; 
+    padding: 50px 6% 30px; 
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.about-left {
+    flex: 0 0 52%;
+    min-width: 0;
+    max-width: 55%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: visible;
+}
+/*avatar*/
+.avatar-container {
+    width: 100%;
+    max-width: 480px;
+    max-height: 520px;
+    margin-top: -80px;
+    margin-bottom: 0;
+    opacity: 0.85;
+}
+.avatar {
+    width: 100%;
+    height: 100%;
+    max-height: 520px;
+    object-fit: contain;
+    display: block;
+}
+/* cards */
+.card-carousel {
+    width: 100%;
+    box-sizing: border-box;
+}
+.info-card {
+    display: none;
+    min-height: 60px;
+    padding: 20px 22px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border: 2px solid var(--azul);
+    box-shadow: 0 0 20px rgba(124, 92, 255, 0.15);
+    box-sizing: border-box;
+    width: 100%;
+}
+.info-card.active{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.info-card h3{
+    font-size: 1.5rem;
+    margin-bottom: 18px;
+    text-align: left;
+}
+.info-card p{
+    line-height: 1.7;
+    text-align: left;
+}
+.carrossel-buttons {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.carrossel-btn {
+    width: 44px;
+    height: 44px;
+    border: 2px solid rgba(124, 92, 255, 0.5);
+    border-radius: 50%;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+.carrossel-btn:hover {
+    background: #7c5cff;
+    border-color: #7c5cff;
+    transform: scale(1.1);
+    box-shadow: 0 0 16px rgba(124, 92, 255, 0.5);
+}
+/*textos*/
+.about-right {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 44%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 36px 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid var(--azul);
+    border-radius: 0 24px 24px 0;
+    min-height: 60vh;
+    box-sizing: border-box;
+    align-self: flex-start;
+    margin-top: 60px;
+}
+.about-right h2 {
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-bottom: 28px;
+    text-align: left;
+}
+.about-right p {
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: #d4d4d4;
+    margin-bottom: 18px;
+    text-align: left;
 }
 
 /* ==========================================
@@ -425,6 +553,37 @@ a:hover{
         width: 100%;
         min-height: auto;
     }
+
+    /* Página "Conheça mais" */
+    .about-section{
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 24px 20px;
+        gap: 30px;
+    }
+    .about-left,
+    .about-right{
+        width: 100%;
+    }
+    .avatar-container{
+        width: 260px;
+        height: 260px;
+    }
+    .card-carousel{
+        max-width: 100%;
+    }
+    .info-card{
+        min-height: 220px;
+        padding: 24px;
+    }
+    .about-right h2{
+        font-size: 2.4rem;
+        line-height: 1.1;
+    }
+    .about-right p{
+        font-size: 1rem;
+        line-height: 1.6;
+    }
 }
 
 /* --- 2. TABLETS (A partir de 768px) --- */
@@ -439,6 +598,17 @@ a:hover{
         padding: 40px;
         gap: 40px;
     }
+    .about-section{
+        padding: 50px 6% 30px;
+        gap: 30px;
+    }
+    .avatar-container{
+        width: 320px;
+        height: 320px;
+    }
+    .about-right h2{
+        font-size: 3rem;
+    }
 }
 
 /* --- 3. LAPTOPS E DESKTOPS (A partir de 1024px) --- */
@@ -448,6 +618,9 @@ a:hover{
     }
     .hero-text h1 {
         font-size: 3.5rem;
+    }
+    .about-section{
+        padding: 50px 8% 30px;
     }
 }
 
@@ -461,6 +634,16 @@ a:hover{
     }
     .hero-expandido {
         padding: 30px 140px 0 140px;
+    }
+    .about-section{
+        gap: 80px;
+    }
+    .avatar-container{
+        width: 500px;
+        height: 500px;
+    }
+    .info-card{
+        min-height: 280px;
     }
 }
 
