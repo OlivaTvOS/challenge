@@ -359,3 +359,139 @@ a:hover{
     opacity: 0.85;
     transform: translateY(0);
 }
+
+/* ==========================================
+   MEDIA QUERIES (ORGANIZADAS POR TAMANHO)
+   ========================================== */
+
+/* --- 1. AJUSTES GERAIS PARA CELULARES (Mobile) --- */
+@media (max-width: 767px) {
+    body {
+        overflow-y: auto; /* Permite rolar a página em telas pequenas */
+    }
+
+    /* Navbar */
+    .menu {
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        padding: 0 20px;
+    }
+    .menu a {
+        text-align: center;
+    }
+
+    /* Hero Inicial e Expandido */
+    .hero-inicial {
+        align-items: center;
+    }
+    #avatar-inicial {
+        max-height: 60vh;
+    }
+    .hero-expandido {
+        flex-direction: column;
+        padding: 20px;
+        gap: 40px;
+        align-items: center;
+    }
+    .hero-text {
+        padding-bottom: 20px;
+        text-align: center;
+    }
+    .hero-text h1 {
+        font-size: 2.2rem;
+        text-align: center;
+    }
+    .hero-text p {
+        text-align: center;
+    }
+    .hero-image img {
+        max-height: 50vh;
+    }
+
+    /* Páginas e Cards */
+    .pagina {
+        padding: 30px 20px;
+    }
+    .card-integrante {
+        width: 100%; /* Card ocupa a largura disponível */
+        min-height: auto;
+    }
+    .card-contato {
+        width: 100%;
+        padding: 30px 20px;
+    }
+    .faq-card {
+        width: 100%;
+        min-height: auto;
+    }
+}
+
+/* --- 2. TABLETS (A partir de 768px) --- */
+@media (min-width: 768px) {
+    body {
+        overflow-y: auto; /* Garante rolagem se o conteúdo do tablet crescer */
+    }
+    .hero-text h1 {
+        font-size: 3rem;
+    }
+    .hero-expandido {
+        padding: 40px;
+        gap: 40px;
+    }
+}
+
+/* --- 3. LAPTOPS E DESKTOPS (A partir de 1024px) --- */
+@media (min-width: 1024px) {
+    .hero-expandido {
+        display: flex; /* Ativa o layout original lado a lado */
+    }
+    .hero-text h1 {
+        font-size: 3.5rem;
+    }
+}
+
+/* --- 4. MONITORES GRANDES / FULL HD (A partir de 1440px) --- */
+@media (min-width: 1440px) {
+    body {
+        overflow: hidden; /* Mantém o seu comportamento original apenas em telas grandes */
+    }
+    .hero-text h1 {
+        font-size: 4rem; /* Retorna ao seu tamanho original */
+    }
+    .hero-expandido {
+        padding: 30px 140px 0 140px;
+    }
+}
+
+/* --- 5. MONITORES 4K (A partir de 2560px) --- */
+@media (min-width: 2560px) {
+    /* Amplia os textos para não ficarem minúsculos na resolução 4K */
+    body {
+        font-size: 1.5rem; 
+    }
+    .hero-text h1 {
+        font-size: 6rem;
+    }
+    .hero-text p {
+        font-size: 2rem;
+    }
+    .menu a {
+        font-size: 1.3rem;
+        padding: 20px 40px;
+    }
+    /* Alarga os containers para aproveitar o espaço do monitor */
+    .hero-text {
+        max-width: 1200px;
+    }
+    .card-integrante {
+        width: 500px;
+        min-height: 800px;
+    }
+    .card-contato {
+        width: 1200px;
+    }
+    .faq-card {
+        width: 700px;
+    }
+}
