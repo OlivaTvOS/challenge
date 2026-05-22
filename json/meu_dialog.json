@@ -1,0 +1,426 @@
+{
+  "name": "Bot Sustentabilidade v3 Final",
+  "language": "pt-br",
+  "intents": [
+    {
+      "intent": "realizar_missao",
+      "examples": [
+        { "text": "Quero realizar uma missão de sustentabilidade" },
+        { "text": "Como faço para completar uma missão?" },
+        { "text": "Gostaria de fazer uma ação ambiental" },
+        { "text": "Qual missão posso fazer agora?" },
+        { "text": "Vou plantar uma árvore" },
+        { "text": "Quero economizar água hoje" },
+        { "text": "Como reciclar de forma correta?" },
+        { "text": "Vou fazer algo sustentável" },
+        { "text": "Preciso de uma missão para fazer" },
+        { "text": "Gostaria de começar uma ação ambiental" },
+        { "text": "Me dê uma missão agora" },
+        { "text": "Quero contribuir com o planeta" }
+      ]
+    },
+    {
+      "intent": "listar_missoes",
+      "examples": [
+        { "text": "Quais são as missões disponíveis?" },
+        { "text": "Mostre-me todas as missões" },
+        { "text": "Que tipo de ação posso fazer?" },
+        { "text": "Quais são as opções de sustentabilidade?" },
+        { "text": "Me mostra as missões de plantio" },
+        { "text": "Quero ver as missões de água" },
+        { "text": "Quais são as missões de energia?" },
+        { "text": "Mostre as missões de reciclagem" },
+        { "text": "Que ações eu posso fazer?" },
+        { "text": "Lista todas as tarefas" },
+        { "text": "Quais missões posso completar esta semana?" },
+        { "text": "Me mostre as opções de ações sustentáveis" }
+      ]
+    },
+    {
+      "intent": "consultar_progresso",
+      "examples": [
+        { "text": "Qual é meu progresso?" },
+        { "text": "Quantas missões completei?" },
+        { "text": "Como está meu desempenho?" },
+        { "text": "Quantas ações fiz essa semana?" },
+        { "text": "Qual é meu limite de missões?" },
+        { "text": "Posso fazer mais missões de plantio?" },
+        { "text": "Já completei o limite de ações de água?" },
+        { "text": "Quantas missões de energia fiz?" },
+        { "text": "Qual é meu saldo de reciclagem?" },
+        { "text": "Mostre meu histórico de ações" },
+        { "text": "Qual é meu desempenho nesta semana?" },
+        { "text": "Quantas missões ainda posso fazer?" }
+      ]
+    },
+    {
+      "intent": "obter_motivacao",
+      "examples": [
+        { "text": "Me motive a fazer mais ações" },
+        { "text": "Por que devo fazer ações sustentáveis?" },
+        { "text": "Como essas ações ajudam o planeta?" },
+        { "text": "Qual é a importância da sustentabilidade?" },
+        { "text": "Me dê uma mensagem de motivação" },
+        { "text": "Por que plantar árvores é importante?" },
+        { "text": "Qual é o impacto de economizar água?" },
+        { "text": "Por que economizar energia?" },
+        { "text": "Como a reciclagem muda o mundo?" },
+        { "text": "Me inspire a ser mais sustentável" },
+        { "text": "Qual é o propósito dessas missões?" },
+        { "text": "Como contribuo para um futuro melhor?" }
+      ]
+    },
+    {
+      "intent": "geral_saudacao",
+      "examples": [
+        { "text": "Olá" },
+        { "text": "Oi" },
+        { "text": "Como vai?" },
+        { "text": "Bem-vindo" },
+        { "text": "Tudo bem?" },
+        { "text": "Oi, tudo certo?" },
+        { "text": "E aí?" },
+        { "text": "Opa, tudo certo?" },
+        { "text": "Que legal te encontrar" },
+        { "text": "Oi, como você está?" },
+        { "text": "Pode começar?" },
+        { "text": "Vamos lá" }
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "entity": "categoria_missao",
+      "values": [
+        {
+          "type": "synonyms",
+          "value": "plantio",
+          "synonyms": ["árvore", "árvores", "plantar", "floresta", "reflorestamento", "flores", "horta", "mudas", "verde", "natureza"]
+        },
+        {
+          "type": "synonyms",
+          "value": "água",
+          "synonyms": ["água", "banho", "torneira", "chuva", "hidrante", "economia de água", "economizar água", "gotejamento", "preservar água", "conservar água"]
+        },
+        {
+          "type": "synonyms",
+          "value": "energia",
+          "synonyms": ["energia", "luz", "eletricidade", "lâmpada", "apagar luz", "economizar energia", "poupança", "stand-by", "plugues", "aparelhos"]
+        },
+        {
+          "type": "synonyms",
+          "value": "reciclagem",
+          "synonyms": ["reciclar", "reciclagem", "lixo", "resíduos", "papel", "plástico", "vidro", "reutilizar", "economizar", "sustentabilidade"]
+        }
+      ]
+    },
+    {
+      "entity": "numero_missao",
+      "values": [
+        { "type": "synonyms", "value": "1", "synonyms": ["uma", "primeira", "missão 1"] },
+        { "type": "synonyms", "value": "2", "synonyms": ["duas", "segunda", "missão 2"] },
+        { "type": "synonyms", "value": "3", "synonyms": ["três", "terceira", "missão 3"] },
+        { "type": "synonyms", "value": "4", "synonyms": ["quatro", "quarta", "missão 4"] },
+        { "type": "synonyms", "value": "5", "synonyms": ["cinco", "quinta", "missão 5"] }
+      ]
+    },
+    {
+      "entity": "sentimento",
+      "values": [
+        { "type": "synonyms", "value": "positivo", "synonyms": ["ótimo", "maravilhoso", "excelente", "bom", "legal", "incrível", "demais", "bacana", "adorei", "amo"] },
+        { "type": "synonyms", "value": "negativo", "synonyms": ["ruim", "chato", "fraco", "nada bom", "não gostei", "decepção", "desagradável", "horroroso", "péssimo", "terrível"] }
+      ]
+    },
+    {
+      "entity": "periodo_tempo",
+      "values": [
+        { "type": "synonyms", "value": "hoje", "synonyms": ["hoje", "agora", "neste momento", "já", "este dia"] },
+        { "type": "synonyms", "value": "semana", "synonyms": ["semana", "esta semana", "7 dias", "sete dias"] },
+        { "type": "synonyms", "value": "mês", "synonyms": ["mês", "este mês", "30 dias", "trinta dias"] }
+      ]
+    },
+    {
+      "entity": "confirmacao",
+      "values": [
+        { "type": "synonyms", "value": "sim", "synonyms": ["sim", "s", "claro", "com certeza", "ok", "tá bom", "beleza", "pode ser", "aceito", "vamos lá"] },
+        { "type": "synonyms", "value": "não", "synonyms": ["não", "n", "de jeito nenhum", "nunca", "nem pensar", "recuso", "nah", "de forma alguma", "nega", "cancelado"] }
+      ]
+    }
+  ],
+  "dialog_nodes": [
+    {
+      "dialog_node": "node_01_saudacao",
+      "type": "standard",
+      "title": "Saudação Inicial",
+      "conditions": "welcome",
+      "context": {
+        "usuario_nome": null,
+        "missoes_completadas": 0,
+        "plantio_count": 0,
+        "agua_count": 0,
+        "energia_count": 0,
+        "reciclagem_count": 0
+      },
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Bem-vindo ao Bot de Sustentabilidade! 🌍\n\nSou seu assistente para ações ambientais. Posso ajudá-lo a encontrar missões sustentáveis, acompanhar seu progresso e motivar você a fazer a diferença.\n\nO que gostaria de fazer?\n1. Ver todas as missões\n2. Filtrar por categoria\n3. Realizar uma ação\n4. Conhecer meu progresso" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_02_limite_atingido",
+      "type": "standard",
+      "title": "Limite Semanal Atingido",
+      "previous_sibling": "node_01_saudacao",
+      "conditions": "#realizar_missao && ((@categoria_missao:(plantio) && $plantio_count >= 5) || (@categoria_missao:(água) && $agua_count >= 5) || (@categoria_missao:(energia) && $energia_count >= 5) || (@categoria_missao:(reciclagem) && $reciclagem_count >= 5))",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "⚠️ Limite semanal atingido para esta categoria! Tente realizar ações de uma categoria diferente para continuar ajudando o planeta." }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_03_realizar_plantio",
+      "type": "standard",
+      "title": "Realizar Missão - PLANTIO",
+      "previous_sibling": "node_02_limite_atingido",
+      "conditions": "#realizar_missao && @categoria_missao:(plantio)",
+      "context": {
+        "plantio_count": "<? $plantio_count + 1 ?>",
+        "missoes_completadas": "<? $missoes_completadas + 1 ?>"
+      },
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "selection_policy": "random",
+            "values": [
+              { "text": "🌱 Cada árvore plantada é uma promessa ao futuro de nosso planeta.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Plantar uma árvore é o começo de uma transformação ambiental que durará séculos.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Uma pequena muda hoje pode se tornar uma floresta inteira amanhã.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Você acabou de plantar esperança verde na terra!\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Que incrível! Mais uma árvore respirando ar puro para todos nós.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Plantadores de árvores são verdadeiros heróis do planeta.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Sua ação de hoje vai gerar sombra e vida para gerações futuras.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Uma árvore plantada é um investimento eterno em sustentabilidade.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Parabéns! Você fez parte da solução para o aquecimento global.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" },
+              { "text": "🌱 Plantar é semear um mundo melhor para nossas crianças.\n\nMissão de PLANTIO realizada!\nTotal: <? $plantio_count ?>/5" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_04_realizar_agua",
+      "type": "standard",
+      "title": "Realizar Missão - AGUA",
+      "previous_sibling": "node_03_realizar_plantio",
+      "conditions": "#realizar_missao && @categoria_missao:(água)",
+      "context": {
+        "agua_count": "<? $agua_count + 1 ?>",
+        "missoes_completadas": "<? $missoes_completadas + 1 ?>"
+      },
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "selection_policy": "random",
+            "values": [
+              { "text": "💧 Cada litro de água economizado é um litro de vida preservado.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Água é ouro azul, e você ajudou a protegê-la!\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Parabéns por economizar água em seus compromissos diários.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Sua atitude consciente ajuda a garantir água para as futuras gerações.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Economia de água começa com pequenas atitudes como a sua.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Você economizou uma quantidade significativa de água preciosa.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Água limpa é um direito, não um luxo.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Seu compromisso com a água é um compromisso com a vida.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Cada gota economizada é uma gota para quem precisa.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" },
+              { "text": "💧 Você demonstrou consciência ambiental ao cuidar da água.\n\nMissão de ÁGUA realizada!\nTotal: <? $agua_count ?>/5" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_05_realizar_energia",
+      "type": "standard",
+      "title": "Realizar Missão - ENERGIA",
+      "previous_sibling": "node_04_realizar_agua",
+      "conditions": "#realizar_missao && @categoria_missao:(energia)",
+      "context": {
+        "energia_count": "<? $energia_count + 1 ?>",
+        "missoes_completadas": "<? $missoes_completadas + 1 ?>"
+      },
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "selection_policy": "random",
+            "values": [
+              { "text": "⚡ Energia limpa começa com escolhas conscientes como a sua!\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Você acabou de economizar eletricidade e dinheiro.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Cada kilowatt economizado reduz sua pegada de carbono.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Apagar luzes desnecessárias é um gesto simples com grande impacto.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Parabéns por usar energia de forma responsável!\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Sua economia de energia ajuda a reduzir emissões.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Menos consumo = planeta mais limpo.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Você demonstrou eficiência energética genuína.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Economia de energia é economia de recursos naturais.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" },
+              { "text": "⚡ Seu consumo consciente inspira mudanças.\n\nMissão de ENERGIA realizada!\nTotal: <? $energia_count ?>/5" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_06_realizar_reciclagem",
+      "type": "standard",
+      "title": "Realizar Missão - RECICLAGEM",
+      "previous_sibling": "node_05_realizar_energia",
+      "conditions": "#realizar_missao && @categoria_missao:(reciclagem)",
+      "context": {
+        "reciclagem_count": "<? $reciclagem_count + 1 ?>",
+        "missoes_completadas": "<? $missoes_completadas + 1 ?>"
+      },
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "selection_policy": "random",
+            "values": [
+              { "text": "♻️ Reciclar é dar uma segunda vida aos materiais!\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Você evitou que lixo fosse desperiçado em aterros.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Parabéns por transformar resíduos em recursos.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Reciclagem é responsabilidade ambiental.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Cada item reciclado é uma vitória contra a poluição.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Seu gesto reduz a extração de matérias-primas.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Menos lixo em aterros, mais sustentabilidade.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Parabéns por escolher a economia circular!\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Você faz diferença para o planeta.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" },
+              { "text": "♻️ Reciclagem muda o mundo.\n\nMissão de RECICLAGEM realizada!\nTotal: <? $reciclagem_count ?>/5" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_07_realizar_generico",
+      "type": "standard",
+      "title": "Realizar Missão Sem Categoria",
+      "previous_sibling": "node_06_realizar_reciclagem",
+      "conditions": "#realizar_missao",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Qual categoria de missão você deseja realizar? (Plantio, Água, Energia ou Reciclagem)" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_08_listar_missoes",
+      "type": "standard",
+      "title": "Listar Missões",
+      "previous_sibling": "node_07_realizar_generico",
+      "conditions": "#listar_missoes",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Aqui estão as principais categorias de ações sustentáveis:\n\n🌳 **Plantio**\n- Plantar uma árvore\n- Plantar flores silvestres\n- Cultivar uma horta\n- Cuidar de mudas\n- Reflorestamento comunitário\n\n💧 **Economia de Água**\n- Banho rápido (5 minutos)\n- Fechar torneira ao escovar dentes\n- Reutilizar água da chuva\n- Lavar carro com balde\n- Verificar vazamentos\n\n⚡ **Economia de Energia**\n- Apagar luzes desnecessárias\n- Desligar aparelhos em stand-by\n- Usar luz natural\n- Reduzir ar condicionado\n- Andar ou usar bicicleta\n\n♻️ **Reciclagem**\n- Reciclar papéis e papelão\n- Reciclar vidro\n- Reciclar plástico\n- Descartar lixo eletrônico\n- Compostar resíduos orgânicos\n\nSobre qual categoria quer saber mais?" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_09_consultar_progresso",
+      "type": "standard",
+      "title": "Consultar Progresso",
+      "previous_sibling": "node_08_listar_missoes",
+      "conditions": "#consultar_progresso",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Seu progresso desta semana:\n\n🌳 Plantio: <? $plantio_count ?>/5 missões\n💧 Água: <? $agua_count ?>/5 missões\n⚡ Energia: <? $energia_count ?>/5 missões\n♻️ Reciclagem: <? $reciclagem_count ?>/5 missões\n\n📊 Total de ações: <? $missoes_completadas ?>\n\nVocê está indo ótimo! Continue contribuindo para um planeta mais sustentável! 🌍\n\nDeseja realizar mais alguma ação?" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_10_motivacao_educacao",
+      "type": "standard",
+      "title": "Motivação e Educação",
+      "previous_sibling": "node_09_consultar_progresso",
+      "conditions": "#obter_motivacao",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Ótima pergunta! Aqui está por que suas ações importam:\n\n🌍 **Impacto Global**\n- Cada árvore plantada absorve CO2 por décadas\n- Economizar água preserva recursos para futuras gerações\n- Reduzir consumo de energia diminui emissões de gases do efeito estufa\n- Reciclar evita que bilhões de toneladas vão para aterros\n\n🤝 **Seu Papel**\nCada pessoa que toma ação sustentável inspira outras. Você é parte da solução!\n\n💪 **Próximas Etapas**\nContinue realizando ações pequenas mas significativas. Juntos fazemos a diferença!\n\nQuer saber mais sobre alguma categoria específica?" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_11_saudacao_geral",
+      "type": "standard",
+      "title": "Saudação Geral",
+      "previous_sibling": "node_10_motivacao_educacao",
+      "conditions": "#geral_saudacao",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Olá! Seja bem-vindo de volta ao Bot de Sustentabilidade! 👋\n\nO que você gostaria de fazer hoje?\n- Realizar uma nova ação\n- Ver missões disponíveis\n- Acompanhar meu progresso\n- Receber motivação" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dialog_node": "node_12_anything_else",
+      "type": "standard",
+      "title": "Em outras palavras",
+      "previous_sibling": "node_11_saudacao_geral",
+      "conditions": "anything_else",
+      "output": {
+        "generic": [
+          {
+            "response_type": "text",
+            "values": [
+              { "text": "Desculpe, não entendi. Você pode tentar dizer de outra forma?" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "counterexamples": [],
+  "metadata": {
+    "api_version": {
+      "major_version": "v2",
+      "minor_version": "2016-07-11"
+    }
+  }
+}

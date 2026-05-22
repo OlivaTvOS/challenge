@@ -1,0 +1,316 @@
+[
+    {
+        "id": "37170caf977938a6",
+        "type": "tab",
+        "label": "Bot Sustentabilidade - Telegram + Watson",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "5fd70a23c4f05a72",
+        "type": "telegram receiver",
+        "z": "37170caf977938a6",
+        "name": "Receber Mensagem Telegram",
+        "bot": "e718ea97bec661d8",
+        "saveDataDir": "",
+        "filterCommands": false,
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [
+                "728c7e9f4194d954"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "728c7e9f4194d954",
+        "type": "switch",
+        "z": "37170caf977938a6",
+        "name": "Verificar Tipo de Mensagem",
+        "property": "payload.type",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "message",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "audio",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "voice",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 3,
+        "x": 240,
+        "y": 60,
+        "wires": [
+            [
+                "c8a637e7cbac2f7b"
+            ],
+            [
+                "92efb8f4d2e38177"
+            ],
+            [
+                "92efb8f4d2e38177"
+            ]
+        ]
+    },
+    {
+        "id": "92efb8f4d2e38177",
+        "type": "watson-speech-to-text",
+        "z": "37170caf977938a6",
+        "name": "Speech to Text (STT)",
+        "alternatives": "",
+        "speakerlabels": false,
+        "smartformatting": false,
+        "lang": "pt-BR",
+        "langhidden": "pt-BR",
+        "langcustom": "NoCustomisationSetting",
+        "langcustomhidden": "",
+        "custom-weight": "",
+        "band": "BroadbandModel",
+        "bandhidden": "",
+        "keywords": "",
+        "keywords-threshold": "",
+        "word-confidence": false,
+        "apikey": "0Q68bSbP4jNNrF1XTMvNYf5wm6cUh5QP8KpJinqqBrpi",
+        "payload-response": false,
+        "streaming-mode": false,
+        "streaming-mute": false,
+        "auto-connect": false,
+        "discard-listening": false,
+        "disable-precheck": false,
+        "service-endpoint": "https://api.au-syd.speech-to-text.watson.cloud.ibm.com/instances/f07e15e8-8672-4791-9115-ca3b7b7ead75",
+        "x": 560,
+        "y": 40,
+        "wires": [
+            [
+                "e52589a769cb2d07"
+            ]
+        ]
+    },
+    {
+        "id": "e52589a769cb2d07",
+        "type": "function",
+        "z": "37170caf977938a6",
+        "name": "Extrair Texto do Áudio",
+        "func": "// Extrair o texto transcrito do response do STT\nif (msg.payload.result && msg.payload.result.results && msg.payload.result.results[0]) {\n    msg.payload.content = msg.payload.result.results[0].alternatives[0].transcript;\n} else {\n    msg.payload.content = \"Desculpe, não consegui compreender o áudio.\";\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 180,
+        "wires": [
+            [
+                "c8a637e7cbac2f7b"
+            ]
+        ]
+    },
+    {
+        "id": "696c43e4f6fc503a",
+        "type": "function",
+        "z": "37170caf977938a6",
+        "name": "Processar Resposta Watson",
+        "func": "// Extrair resposta do Watson baseado na nossa nova estrutura\nlet response_text = \"\";\n\nif (msg.payload.result && msg.payload.result.output && msg.payload.result.output.generic) {\n    const generics = msg.payload.result.output.generic;\n    for (let i = 0; i < generics.length; i++) {\n        if (generics[i].response_type === 'text' && generics[i].text) {\n            response_text += generics[i].text + \"\\n\\n\";\n        }\n    }\n}\n\n// Armazenar contexto para próxima interação se necessário\nif (msg.payload.result && msg.payload.result.context) {\n    msg.context = msg.payload.result.context;\n}\n\n// Preparar payload de volta para o Telegram (Exige 'content')\nmsg.payload = {\n    chatId: msg.payload.chatId || (msg.originalMessage ? msg.originalMessage.chat.id : null),\n    type: msg.payload.type || \"message\",\n    content: response_text.trim() || \"Desculpe, não consegui processar sua mensagem.\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 380,
+        "wires": [
+            [
+                "05b5d80b2f1b4938"
+            ]
+        ]
+    },
+    {
+        "id": "05b5d80b2f1b4938",
+        "type": "switch",
+        "z": "37170caf977938a6",
+        "name": "Tipo de Resposta?",
+        "property": "payload.response_format",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "audio",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "audio",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 850,
+        "y": 300,
+        "wires": [
+            [
+                "dbde2eb0ba6d605a"
+            ],
+            [
+                "08f44a3402d11d38"
+            ]
+        ]
+    },
+    {
+        "id": "08f44a3402d11d38",
+        "type": "watson-text-to-speech",
+        "z": "37170caf977938a6",
+        "name": "Text to Speech (TTS)",
+        "lang": "pt-BR",
+        "langhidden": "pt-BR",
+        "langcustom": "NoCustomisationSetting",
+        "langcustomhidden": "",
+        "voice": "pt-BR_CamilaNatural",
+        "voicehidden": "",
+        "format": "audio/ogg; codecs=opus",
+        "apikey": "AgpbvwDlFTyjfyTK5zOvZBf3VDN5EYHpRIMU8pBhdZM3",
+        "payload-response": false,
+        "service-endpoint": "https://api.au-syd.text-to-speech.watson.cloud.ibm.com/instances/bb4ed1dc-48cb-4630-b62e-f0da796c2169",
+        "x": 940,
+        "y": 380,
+        "wires": [
+            [
+                "4a82a20d92a32849"
+            ]
+        ]
+    },
+    {
+        "id": "dbde2eb0ba6d605a",
+        "type": "telegram sender",
+        "z": "37170caf977938a6",
+        "name": "Enviar Mensagem Texto",
+        "bot": "e718ea97bec661d8",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 890,
+        "y": 180,
+        "wires": [
+            [
+                "4e0d6f225f4e3488"
+            ]
+        ]
+    },
+    {
+        "id": "4e0d6f225f4e3488",
+        "type": "function",
+        "z": "37170caf977938a6",
+        "name": "Registrar em LOG",
+        "func": "node.log(`[${new Date().toISOString()}] Resposta processada e enviada!`);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 200,
+        "wires": [
+            [
+                "f6ccaff370b4cf29"
+            ]
+        ]
+    },
+    {
+        "id": "f6ccaff370b4cf29",
+        "type": "debug",
+        "z": "37170caf977938a6",
+        "name": "Fim do Fluxo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 1370,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "4a82a20d92a32849",
+        "type": "telegram sender",
+        "z": "37170caf977938a6",
+        "name": "Enviar Mensagem Áudio",
+        "bot": "e718ea97bec661d8",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 1230,
+        "y": 380,
+        "wires": [
+            [
+                "4e0d6f225f4e3488"
+            ]
+        ]
+    },
+    {
+        "id": "c8a637e7cbac2f7b",
+        "type": "watson-assistant-v2",
+        "z": "37170caf977938a6",
+        "name": "Enviar para Watson Assistan",
+        "service-endpoint": "https://api.us-south.assistant.watson.cloud.ibm.com/instances/f3444c6f-73b5-4734-9c4f-c7679e5f7e85",
+        "assistant_id": "25a6fbeb-a5ca-460a-9340-d58aedf38a84",
+        "debug": false,
+        "restart": false,
+        "return_context": true,
+        "alternate_intents": false,
+        "multisession": true,
+        "timeout": "",
+        "optout-learning": false,
+        "persist-session-id": false,
+        "x": 320,
+        "y": 360,
+        "wires": [
+            [
+                "696c43e4f6fc503a"
+            ]
+        ]
+    },
+    {
+        "id": "e718ea97bec661d8",
+        "type": "telegram bot",
+        "botname": "Kaori",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "pollinterval": 300,
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": 6667,
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbothost": "0.0.0.0",
+        "localbotport": 8443,
+        "publicbotport": 8443,
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    }
+]

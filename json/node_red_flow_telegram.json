@@ -1,0 +1,250 @@
+[
+  {
+    "id": "bot_sustentabilidade_telegram",
+    "type": "tab",
+    "label": "Bot Sustentabilidade - Telegram + Watson",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "bot_config",
+    "type": "telegram-bot-config",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Configuração Telegram Bot",
+    "botname": "SoulUpSustainabilityBot",
+    "bottoken": "YOUR_TELEGRAM_BOT_TOKEN",
+    "usernames": "",
+    "chatids": "",
+    "baseurl": ""
+  },
+  {
+    "id": "telegram_input",
+    "type": "telegram receiver",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Receber Mensagem Telegram",
+    "bot": "bot_config",
+    "x": 50,
+    "y": 50,
+    "wires": [
+      [
+        "check_message_type"
+      ]
+    ]
+  },
+  {
+    "id": "check_message_type",
+    "type": "switch",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Verificar Tipo de Mensagem",
+    "property": "payload.type",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "message",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "audio",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "voice",
+        "vt": "str"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 3,
+    "x": 250,
+    "y": 50,
+    "wires": [
+      [
+        "text_to_watson"
+      ],
+      [
+        "speech_to_text"
+      ],
+      [
+        "speech_to_text"
+      ]
+    ]
+  },
+  {
+    "id": "speech_to_text",
+    "type": "watson-speech-to-text",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Speech to Text (STT)",
+    "apikey": "YOUR_IBM_STT_API_KEY",
+    "url": "https://api.us-south.speech-to-text.watson.cloud.ibm.com",
+    "lang": "pt-BR",
+    "x": 450,
+    "y": 100,
+    "wires": [
+      [
+        "extract_text"
+      ]
+    ]
+  },
+  {
+    "id": "extract_text",
+    "type": "function",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Extrair Texto do Áudio",
+    "func": "// Extrair o texto transcrito do response do STT\nif (msg.payload.result && msg.payload.result.results && msg.payload.result.results[0]) {\n    msg.payload.content = msg.payload.result.results[0].alternatives[0].transcript;\n} else {\n    msg.payload.content = \"Desculpe, não consegui compreender o áudio.\";\n}\nreturn msg;",
+    "outputs": 1,
+    "x": 650,
+    "y": 100,
+    "wires": [
+      [
+        "text_to_watson"
+      ]
+    ]
+  },
+  {
+    "id": "text_to_watson",
+    "type": "watson-assistant-v2",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Enviar para Watson Assistant",
+    "apikey": "YOUR_IBM_WATSON_API_KEY",
+    "url": "https://api.us-south.assistant.watson.cloud.ibm.com",
+    "assistantid": "YOUR_ASSISTANT_ID",
+    "serviceinstance": "your-instance-name",
+    "x": 250,
+    "y": 150,
+    "wires": [
+      [
+        "process_watson_response"
+      ]
+    ]
+  },
+  {
+    "id": "process_watson_response",
+    "type": "function",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Processar Resposta Watson",
+    "func": "// Extrair resposta do Watson baseado na nossa nova estrutura\nlet response_text = \"\";\n\nif (msg.payload.result && msg.payload.result.output && msg.payload.result.output.generic) {\n    const generics = msg.payload.result.output.generic;\n    for (let i = 0; i < generics.length; i++) {\n        if (generics[i].response_type === 'text' && generics[i].text) {\n            response_text += generics[i].text + \"\\n\\n\";\n        }\n    }\n}\n\n// Armazenar contexto para próxima interação se necessário\nif (msg.payload.result && msg.payload.result.context) {\n    msg.context = msg.payload.result.context;\n}\n\n// Preparar payload de volta para o Telegram (Exige 'content')\nmsg.payload = {\n    chatId: msg.payload.chatId || (msg.originalMessage ? msg.originalMessage.chat.id : null),\n    type: msg.payload.type || \"message\",\n    content: response_text.trim() || \"Desculpe, não consegui processar sua mensagem.\"\n};\n\nreturn msg;",
+    "outputs": 1,
+    "x": 450,
+    "y": 150,
+    "wires": [
+      [
+        "decide_response_type"
+      ]
+    ]
+  },
+  {
+    "id": "decide_response_type",
+    "type": "switch",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Tipo de Resposta?",
+    "property": "payload.response_format",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "neq",
+        "v": "audio",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "audio",
+        "vt": "str"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 2,
+    "x": 650,
+    "y": 150,
+    "wires": [
+      [
+        "send_text_telegram"
+      ],
+      [
+        "text_to_speech"
+      ]
+    ]
+  },
+  {
+    "id": "text_to_speech",
+    "type": "watson-text-to-speech",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Text to Speech (TTS)",
+    "apikey": "YOUR_IBM_TTS_API_KEY",
+    "url": "https://api.us-south.text-to-speech.watson.cloud.ibm.com",
+    "lang": "pt-BR",
+    "voice": "pt-BR_IsabelaV3Voice",
+    "x": 850,
+    "y": 200,
+    "wires": [
+      [
+        "send_audio_telegram"
+      ]
+    ]
+  },
+  {
+    "id": "send_text_telegram",
+    "type": "telegram sender",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Enviar Mensagem Texto",
+    "bot": "bot_config",
+    "chatId": "",
+    "parseMode": "HTML",
+    "x": 850,
+    "y": 100,
+    "wires": [
+      [
+        "log_response"
+      ]
+    ]
+  },
+  {
+    "id": "send_audio_telegram",
+    "type": "telegram sender",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Enviar Mensagem Áudio",
+    "bot": "bot_config",
+    "chatId": "",
+    "type": "audio",
+    "x": 850,
+    "y": 250,
+    "wires": [
+      [
+        "log_response"
+      ]
+    ]
+  },
+  {
+    "id": "log_response",
+    "type": "function",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Registrar em LOG",
+    "func": "node.log(`[${new Date().toISOString()}] Resposta processada e enviada!`);\nreturn msg;",
+    "outputs": 1,
+    "x": 1050,
+    "y": 150,
+    "wires": [
+      [
+        "end_node"
+      ]
+    ]
+  },
+  {
+    "id": "end_node",
+    "type": "debug",
+    "z": "bot_sustentabilidade_telegram",
+    "name": "Fim do Fluxo",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": true,
+    "complete": "true",
+    "targetType": "full",
+    "x": 1200,
+    "y": 150,
+    "wires": []
+  }
+]
