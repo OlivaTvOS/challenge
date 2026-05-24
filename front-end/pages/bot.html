@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>BOT</title>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <ul class="menu">
+                <li><a href="../index.html"> INÍCIO </a></li>
+                <li><a href="../pages/about.html"> CONHEÇA MAIS </a></li>
+                <li><a href="../pages/integrantes.html"> QUEM SOMOS </a></li>
+                <li><a href="../pages/faq.html"> FAQ </a></li>
+                <li><a href="../pages/contato.html"> CONTATO </a> </li>
+                <li><a href="../pages/bot.html"> BOT </a> </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="bot-page">
+
+        <section class="bot-container">
+
+            <div class="bot-avatar">
+                <img src="../img/about.png" alt="Avatar Bot">
+            </div>
+
+            <div class="bot-panel">
+
+                <h1>Teste do Bot Sustentável</h1>
+
+                <p>
+                    Esta página foi criada exclusivamente para testar o comportamento do bot,
+                    mantendo a mesma identidade visual, estrutura e experiência já utilizada
+                    no restante do projeto.
+                </p>
+
+                <div class="bot-actions">
+                    <button class="bot-btn" onclick="gerarMissao('PLANTIO')">PLANTIO</button>
+                    <button class="bot-btn" onclick="gerarMissao('AGUA')">ÁGUA</button>
+                    <button class="bot-btn" onclick="gerarMissao('ENERGIA')">ENERGIA</button>
+                    <button class="bot-btn" onclick="gerarMissao('RECICLAGEM')">RECICLAGEM</button>
+                </div>
+
+                <div class="resultado-box" id="resultado">
+                    <h3>Aguardando interação...</h3>
+                    <p>Selecione uma categoria para testar o funcionamento do bot.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+    <script src="../javascript/bot.js"></script>
+</body>
