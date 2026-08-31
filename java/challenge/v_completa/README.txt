@@ -1,1 +1,0 @@
-Esta versão do programa em java é para ser atualizada e posteriormente considerada a final para o projeto, porém, para fins de desenvolvimento, será utilizada outra versão mais simples do programa. Os arquivos na pasta BotOrchestrator devem continuar em processo de melhoria até possível implementação e total integração com a proposta de solução do projeto.
