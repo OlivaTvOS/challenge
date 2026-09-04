@@ -16,7 +16,6 @@ while rodando:
     print("3 - Atualizar dados do perfil")
     print("4 - Deletar perfil")
     print("5 - Realizar missão")
-
     print("6 - Ver postagens")
 
     opcoes = int(input("Digite a opção desejada: "))
@@ -55,8 +54,8 @@ while rodando:
                 print("Erro! Este email já está cadastrado")
             else:
                 exibe_adicao = subalgoritmos.adicionar_usuario(usuarios_sistema, nome_usuario, nome_completo, email, senha_usuario)
-            print("Usuário adicionado ao sistema")
-            print(exibe_adicao)
+                print("Usuário adicionado ao sistema")
+                print(exibe_adicao)
 
         case 2:
             nome_usuario = input("Digite o nome do usuário que deseja encontrar: ")
@@ -66,5 +65,25 @@ while rodando:
                 print(consulta)
             else:
                 print("Erro! Usuário inexistente")
-        case _:
+        case 3:
+            nome_usuario = input("Digite o nome do usuário que deseja atualizar: ")
+            nome_completo = input("Digite o novo nome completo: ")
+            email = input("Digite o novo email: ")
+            senha_usuario = input("Digite a nova senha: ")
+
+            if nome_usuario in usuarios_sistema:
+                atualizacao = subalgoritmos.atualizar_usuario(usuarios_sistema, nome_usuario, nome_completo, email, senha_usuario)
+                print("Usuário atualizado com sucesso")
+                print(atualizacao)
+            else:
+                print("Erro! Usuário inexistente")
+        case 4:
+            nome_usuario = input("Digite o nome do usuário que deseja remover: ")
+
+            if nome_usuario in usuarios_sistema:
+                remove_usuario = subalgoritmos.remover_usuario(usuarios_sistema, nome_usuario)
+                print(remove_usuario)
+            else:
+                print("Usuário inexistente!")
+        case _: 
             print("Opção inexistente")
