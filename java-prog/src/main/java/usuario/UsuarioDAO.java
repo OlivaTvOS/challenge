@@ -15,10 +15,10 @@ public class UsuarioDAO {
     public boolean existeRegistro(String tabela, String coluna, String valor) {
         String sql = "SELECT 1 FROM " + tabela + " WHERE " + coluna + " = ? FETCH FIRST 1 ROWS ONLY";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, valor);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, valor);
 
-            try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs = preparedStatement.executeQuery()) {
                 return rs.next();
             }
         } catch (SQLException e) {
@@ -31,41 +31,78 @@ public class UsuarioDAO {
 
         String sql = "INSERT INTO USUARIO (NOME_USUARIO, NOME, EMAIL, SENHA) VALUES (?,?,?,?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        // Tratamento novo para retornar o ID e manter a persistência da sessão em uma
+        // conta criada
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"ID_USUARIO"})) {
 
-            statement.setString(1, cadastro.getNomeUsuario());
-            statement.setString(2, cadastro.getNomeCompleto());
-            statement.setString(3, cadastro.getEmail());
-            statement.setString(4, cadastro.getSenha());
+            preparedStatement.setString(1, cadastro.getNomeUsuario());
+            preparedStatement.setString(2, cadastro.getNomeCompleto());
+            preparedStatement.setString(3, cadastro.getEmail());
+            preparedStatement.setString(4, cadastro.getSenha());
 
-            // CORREÇÃO 1: Executa o comando de inserção no banco de dados
-            int novosDados = statement.executeUpdate();
+            // VERIFICAÇÃO 1: Executa o comando de inserção no banco de dados
+            int novosDados = preparedStatement.executeUpdate();
 
-            // CORREÇÃO 2: Retorna true se pelo menos uma linha foi inserida
+            if (novosDados > 0) {
+                try (ResultSet getGeneratedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (getGeneratedKeys.next()) {
+                        int idGerado = getGeneratedKeys.getInt(1);
+
+                        cadastro.setId(idGerado);
+                    }
+                }
+            }
+
+            SessaoUsuario.getInstance().setUsuario(cadastro);
+            System.out.println("Usuário criado e fixado!");
+
+            // VERIFICAÇÃO 2: Retorna true se pelo menos uma linha foi inserida
             return novosDados > 0;
 
         } catch (SQLException e) {
-            System.out.println("Erro ao cadastrar usuário: ");
+            System.out.println("Erro ao cadastrar usuário: " + e.getMessage());
             return false; // Retorna false caso aconteça alguma exceção do banco
         }
     }
 
-    public void exibirDados(Connection connection) {
-        String sql = "SELECT NOME_USUARIO, NOME, EMAIL FROM USUARIO"; // Ajuste com suas colunas e tabela
+    public boolean carregarDadosUsuario(int id) {
+        String sql = "SELECT NOME_USUARIO, NOME, EMAIL FROM USUARIO WHERE ID_USUARIO = ?";
 
-        // Usamos PreparedStatement em vez de Statement comum
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                ResultSet rs = preparedStatement.executeQuery()) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, id);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    Cadastro c = new Cadastro();
 
-            // Seu laço para exibir os dados
-            while (rs.next()) {
-                System.out.println("Usuário: " + rs.getString("NOME_USUARIO") + "\n");
-                System.out.println("Nome: " + rs.getString("NOME") + "\n");
-                System.out.println("Email: " + rs.getString("EMAIL"));
+                    c.setId(rs.getInt("ID_USUARIO"));
+                    c.setNomeUsuario(rs.getString("NOME_USUARIO"));
+                    c.setNomeCompleto(rs.getString("NOME"));
+                    c.setEmail(rs.getString("EMAIL"));
+
+                    SessaoUsuario.getInstance().setUsuario(c);
+                    return true;
+                }
             }
 
         } catch (SQLException e) {
-            System.out.println("Erro ao exibir dados do usuário: " + e.getMessage());
+            System.out.println("Erro ao buscar dados do perfil!");
+        }
+        return false;
+    }
+
+    public boolean alterarDadosUsuario(Cadastro alterar){
+        String sql = "UPDATE USUARIO SET NOME_USUARIO = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setString(1, alterar.getNomeUsuario());
+
+            int novosDados = preparedStatement.executeUpdate();
+            
+            return novosDados > 0;
+            
+        } catch (SQLException e) {
+            System.out.println("Erro! Não foi possível alterar os dados!");
+            return false;
         }
     }
 }

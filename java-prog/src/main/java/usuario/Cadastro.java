@@ -2,6 +2,7 @@ package usuario;
 
 public class Cadastro {
 
+    private int id;
     private String nomeUsuario;
     private String nomeCompleto;
     private String email;
@@ -18,6 +19,20 @@ public class Cadastro {
         this.email = email;
         this.senha = senha;
         this.tipoUsuario = "USUARIO";
+    }
+
+    public Cadastro(int id, String nomeUsuario, String nomeCompleto, String email, String senha) {
+
+        this.id = id;
+        this.nomeUsuario = nomeUsuario;
+        this.nomeCompleto = nomeCompleto;
+        this.email = email;
+        this.senha = senha;
+        this.tipoUsuario = "USUARIO";
+    }
+
+    public int getId(){
+        return id;
     }
 
     public String getNomeUsuario() {
@@ -38,6 +53,10 @@ public class Cadastro {
 
     public String getTipoUsuario() {
         return tipoUsuario;
+    }
+
+    public void setId(int id){
+        this.id = id;
     }
 
     public void setNomeUsuario(String nomeUsuario) {

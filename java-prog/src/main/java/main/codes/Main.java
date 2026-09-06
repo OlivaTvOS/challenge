@@ -1,4 +1,5 @@
 package main.codes;
+
 import missao.*;
 import database.DatabaseConfig;
 import usuario.*;
@@ -7,31 +8,40 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import database.DatabaseConfig;
-
 public class Main {
     static void main() {
-        // Scanner gerenciado por try-with-resources (fecha automaticamente ao sair do programa)
+        // Scanner gerenciado por try-with-resources (fecha automaticamente ao sair do
+        // programa)
         try (Scanner scanner = new Scanner(System.in)) {
             boolean continuar = true;
 
             while (continuar) {
                 // Até a 4 são exclusivamente funções para atender os requsitos de um CRUD
                 System.out.println("\n===== MENU =====");
-                
-                System.out.println("0 - Sair"); //  ✅ Feito
+
+                System.out.println("0 - Sair"); // ✅ Feito
 
                 System.out.println("1 - Criar perfil"); // ✅ Feito
 
-                System.out.println("2 - Ver status do perfil"); // 👍 - Faltam Implemenações / Ver missões realizadas, tipos de interação, quantidade de interações (possivelmente com visualização de diferentes perídos)
+                System.out.println("2 - Ver status do perfil"); // 👍 - Faltam Implemenações / Ver missões realizadas,
+                                                                // tipos de interação, quantidade de interações
+                                                                // (possivelmente com visualização de diferentes
+                                                                // perídos)
 
-                System.out.println("3 - Atualizar dados do perfil"); // Permite atualizar informações erradas digitadas pelo usuário (somente com confirmação dos dados).
+                System.out.println("3 - Atualizar dados do perfil"); // Permite atualizar informações erradas digitadas
+                                                                     // pelo usuário (somente com confirmação dos
+                                                                     // dados).
 
-                System.out.println("4 - Deletar perfil"); // Apenas deleta o perfil do banco com confirmação dos dados do usuário
+                System.out.println("4 - Deletar perfil"); // Apenas deleta o perfil do banco com confirmação dos dados
+                                                          // do usuário
 
-                System.out.println("5 - Realizar missão"); // Realizar missões engloba período de testes, adição no ranking pós período, junção dos dados para geração do csv, realização contínua de missões pós avaliação, aumento no ranking, pontuação para cada missão
+                System.out.println("5 - Realizar missão"); // Realizar missões engloba período de testes, adição no
+                                                           // ranking pós período, junção dos dados para geração do csv,
+                                                           // realização contínua de missões pós avaliação, aumento no
+                                                           // ranking, pontuação para cada missão
 
-                System.out.println("6 - Ver postagens"); // Ver postagens abrange dar curtidas, comentar, ir para próxima ou parar de ver
+                System.out.println("6 - Ver postagens"); // Ver postagens abrange dar curtidas, comentar, ir para
+                                                         // próxima ou parar de ver
                 System.out.print("Escolha: ");
 
                 int opcao = scanner.nextInt();
@@ -59,10 +69,12 @@ public class Main {
     }
 
     /**
-     * Método auxiliar para isolar a lógica de cadastro e manter o método main limpo.
+     * Método auxiliar para isolar a lógica de cadastro e manter o método main
+     * limpo.
      */
     private static void cadastrarUsuario(Scanner scanner) {
-        // 1. Dados de configuração do banco (carregados antes para evitar abrir conexão à toa)
+        // 1. Dados de configuração do banco (carregados antes para evitar abrir conexão
+        // à toa)
         String url = DatabaseConfig.get("db.url");
         String usuario = DatabaseConfig.get("db.user");
         String senha = DatabaseConfig.get("db.password");
@@ -156,21 +168,21 @@ public class Main {
         }
     }
 
-    public static void statusPerfil(){
-        String url = DatabaseConfig.get("db.url");
-        String usuario = DatabaseConfig.get("db.user");
-        String senha = DatabaseConfig.get("db.password");
+    public static void statusPerfil() {
+        Cadastro perfil = SessaoUsuario.getInstance().getUsuario();
 
-        // Abre a conexão com o banco de dados logo no início para validar em tempo real
-        try (Connection conn = DriverManager.getConnection(url, usuario, senha)) {
-            System.out.println("Conexão realizada com sucesso!");
-            UsuarioDAO usuarioDAO = new UsuarioDAO(conn);
-
-            usuarioDAO.exibirDados(conn);
-
-        } catch (SQLException e) {
-            System.out.println("Erro ao operar no banco");
+        if (perfil != null) {
+            System.out.println("\n=== PERFIL DO USUÁRIO ===");
+            System.out.println("Username: " + perfil.getNomeUsuario());
+            System.out.println("Nome: " + perfil.getNomeCompleto());
+            System.out.println("Email: " + perfil.getEmail());
+        } else {
+            System.out.println("Usuários não encontrados!");
         }
+    }
+
+    public static void alterarDadosPerfil(){
+        
     }
 
     public static void realizarMissao() {
@@ -183,7 +195,7 @@ public class Main {
             System.out.println("Conexão realizada com sucesso!");
 
             /* UsuarioDAO usuarioDAO = new UsuarioDAO(conn); */
-            
+
         } catch (SQLException e) {
             System.out.println("Erro ao operar no banco");
         }
