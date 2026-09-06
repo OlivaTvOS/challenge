@@ -1,4 +1,4 @@
-package org.example;
+package usuario;
 
 public class Cadastro {
 

@@ -1,8 +1,13 @@
-package org.example;
+package main.codes;
+import missao.*;
+import database.DatabaseConfig;
+import usuario.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
+
+import database.DatabaseConfig;
 
 public class Main {
     static void main() {
@@ -18,7 +23,7 @@ public class Main {
 
                 System.out.println("1 - Criar perfil"); // ✅ Feito
 
-                System.out.println("2 - Ver status do perfil"); // Ver missões realizadas, tipos de interação, quantidade de interações (possivelmente com visualização de diferentes perídos)
+                System.out.println("2 - Ver status do perfil"); // 👍 - Faltam Implemenações / Ver missões realizadas, tipos de interação, quantidade de interações (possivelmente com visualização de diferentes perídos)
 
                 System.out.println("3 - Atualizar dados do perfil"); // Permite atualizar informações erradas digitadas pelo usuário (somente com confirmação dos dados).
 
@@ -42,6 +47,8 @@ public class Main {
                         cadastrarUsuario(scanner);
                         break;
                     case 2:
+                        System.out.println("Exibindo dados: \n");
+                        statusPerfil();
                         break;
                     default:
                         System.out.println("Opção inválida! Tente novamente.");
@@ -144,6 +151,39 @@ public class Main {
                 System.out.println("\nNão foi possível criar o perfil.");
             }
 
+        } catch (SQLException e) {
+            System.out.println("Erro ao operar no banco");
+        }
+    }
+
+    public static void statusPerfil(){
+        String url = DatabaseConfig.get("db.url");
+        String usuario = DatabaseConfig.get("db.user");
+        String senha = DatabaseConfig.get("db.password");
+
+        // Abre a conexão com o banco de dados logo no início para validar em tempo real
+        try (Connection conn = DriverManager.getConnection(url, usuario, senha)) {
+            System.out.println("Conexão realizada com sucesso!");
+            UsuarioDAO usuarioDAO = new UsuarioDAO(conn);
+
+            usuarioDAO.exibirDados(conn);
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao operar no banco");
+        }
+    }
+
+    public static void realizarMissao() {
+        String url = DatabaseConfig.get("db.url");
+        String usuario = DatabaseConfig.get("db.user");
+        String senha = DatabaseConfig.get("db.password");
+
+        // Abre a conexão com o banco de dados logo no início para validar em tempo real
+        try (Connection conn = DriverManager.getConnection(url, usuario, senha)) {
+            System.out.println("Conexão realizada com sucesso!");
+
+            /* UsuarioDAO usuarioDAO = new UsuarioDAO(conn); */
+            
         } catch (SQLException e) {
             System.out.println("Erro ao operar no banco");
         }
