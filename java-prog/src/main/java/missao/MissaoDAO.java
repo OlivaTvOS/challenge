@@ -121,8 +121,6 @@ public class MissaoDAO {
 
         List<Missao> missoes = new ArrayList<>();
 
-        
-
         String sql = "SELECT ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA FROM MISSAO WHERE ID_CATEGORIA = ? AND ATIVA = 'S' ORDER ID_MISSAO ";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {

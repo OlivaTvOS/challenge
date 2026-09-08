@@ -11,7 +11,6 @@ import usuario.Cadastro;
 import usuario.SessaoUsuario;
 import usuario.UsuarioDAO;
 import missao.Missao;
-import missao.MissaoDAO;
 import missao.UsuarioMissaoDAO;
 
 import java.util.List;
@@ -226,6 +225,115 @@ public class funcoes {
         }
     }
 
+    public static void removerPerfil(Scanner scanner) {
+        String url = DatabaseConfig.get("db.url");
+        String usuario = DatabaseConfig.get("db.user");
+        String senha = DatabaseConfig.get("db.password");
+
+        // Abre a conexão com o banco de dados logo no início para validar em tempo real
+        try (Connection conn = DriverManager.getConnection(url, usuario, senha)) {
+            System.out.println("Conexão realizada com sucesso!");
+            UsuarioDAO usuarioDAO = new UsuarioDAO(conn);
+
+            String senhaPerfil;
+
+            System.out.print("Tem certeza que deseja deletar seu perfil? (S/N): ");
+            String resposta = scanner.nextLine().trim();
+
+            if (!resposta.equalsIgnoreCase("S")) {
+                System.out.println("Operação cancelada pelo usuário.");
+                return; // Encerra o método aqui mesmo se ele não quiser deletar
+            }
+
+            while (true) {
+                System.out.print("Digite sua senha para confirmar a exclusão: ");
+                senhaPerfil = scanner.nextLine();
+
+                if (senhaPerfil.trim().isEmpty()) {
+                    System.out.println("Erro! Você não pode deixar sua senha em branco.");
+                    continue;
+                }
+                break; 
+            }
+
+            int idLogado = SessaoUsuario.getInstance().getUsuario().getId();
+
+            boolean sucessoRemover = usuarioDAO.removerPerfil(idLogado, senhaPerfil);
+
+            if (sucessoRemover) {
+                System.out.println("Sua conta foi permanentemente excluída. Deslogando...");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro na conexão: " + e.getMessage());
+        }
+    }
+
+    public static void logarPerfil(Scanner scanner) {
+        String url = DatabaseConfig.get("db.url");
+        String usuario = DatabaseConfig.get("db.user");
+        String senha = DatabaseConfig.get("db.password");
+
+        // Abre a conexão com o banco de dados logo no início para validar em tempo real
+        try (Connection conn = DriverManager.getConnection(url, usuario, senha)) {
+            System.out.println("Conexão realizada com sucesso!");
+            UsuarioDAO usuarioDAO = new UsuarioDAO(conn);
+
+            String emailPerfil;
+            String senhaPerfil;
+
+            // --- ETAPA 3: EMAIL (Texto + Banco) ---
+            while (true) {
+                System.out.print("Email: ");
+                emailPerfil = scanner.nextLine();
+
+                if (emailPerfil.trim().isEmpty()) {
+                    System.out.println("Erro! Seu email não pode estar vazio");
+                    continue;
+                }
+
+                // Já valida no banco na mesma hora!
+                if (!usuarioDAO.existeUsuarioRegistro("USUARIO", "EMAIL", emailPerfil)) {
+                    System.out.println("Este email não existe! Escolha outro.\n");
+                    continue; // Volta para o início deste while para pedir o email de novo
+                }
+
+                break; // Se passou no empty e no banco, avança para a senha
+            }
+
+            // --- ETAPA 4: SENHA ---
+            while (true) {
+                System.out.print("Senha: ");
+                senhaPerfil = scanner.nextLine();
+
+                if (senhaPerfil.trim().isEmpty()) {
+                    System.out.println("Erro! Você não pode deixar sua senha em branco");
+                    continue;
+                }
+                break;
+            }
+
+            boolean sucessoLogin = usuarioDAO.logarUsuario(emailPerfil.toLowerCase(), senhaPerfil.toLowerCase());
+
+            if (sucessoLogin) {
+                System.out.println("\nLogin realizado com sucesso!");
+                System.out.println(sucessoLogin);
+
+                String nomeUsuarioLogado = SessaoUsuario.getInstance().getUsuario().getNomeUsuario();
+                System.out.println("Usuário: " + nomeUsuarioLogado);
+                String nomeCompletoLogado = SessaoUsuario.getInstance().getUsuario().getNomeCompleto();
+                System.out.println("Nome: " + nomeCompletoLogado);
+                String emailLogado = SessaoUsuario.getInstance().getUsuario().getEmail();
+                System.out.println("Email: " + emailLogado);
+            } else {
+                System.out.println("\nNão foi possível logar no perfil.");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao operar no banco");
+        }
+    }
+
     public static void realizarMissao(Scanner scanner) {
 
         String url = DatabaseConfig.get("db.url");
@@ -255,7 +363,8 @@ public class funcoes {
                 System.out.println("\n=== MISSÕES EM ANDAMENTO ===");
 
                 for (Missao missao : missoesEmAndamento) {
-                    System.out.println(missao.getIdMissao() + " - " + missao.getTitulo() + " (" + missao.getPontosRecompensa() + " pontos)");
+                    System.out.println(missao.getIdMissao() + " - " + missao.getTitulo() + " ("
+                            + missao.getPontosRecompensa() + " pontos)");
                 }
 
                 System.out.print("\nDeseja continuar uma missão em andamento? (S/N): ");
@@ -286,10 +395,9 @@ public class funcoes {
 
                     if (conclusao.equalsIgnoreCase("S")) {
                         usuarioMissaoDAO.concluirMissao(idUsuario, idMissao);
-                    } else if (conclusao.equalsIgnoreCase("N")){
+                    } else if (conclusao.equalsIgnoreCase("N")) {
                         System.out.println("Missão permanece em andamento.");
-                    }
-                    else {
+                    } else {
                         System.out.println("Opção inválida");
                     }
 

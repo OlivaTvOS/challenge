@@ -31,12 +31,14 @@ public class Main {
                 System.out.println("4 - Deletar perfil"); // Apenas deleta o perfil do banco com confirmação dos dados
                                                           // do usuário
 
-                System.out.println("5 - Realizar missão"); // Realizar missões engloba período de testes, adição no
+                System.out.println("5 - Logar no perfil");
+
+                System.out.println("6 - Realizar missão"); // Realizar missões engloba período de testes, adição no
                                                            // ranking pós período, junção dos dados para geração do csv,
                                                            // realização contínua de missões pós avaliação, aumento no
                                                            // ranking, pontuação para cada missão
 
-                System.out.println("6 - Ver postagens"); // Ver postagens abrange dar curtidas, comentar, ir para
+                System.out.println("7 - Ver postagens"); // Ver postagens abrange dar curtidas, comentar, ir para
                                                          // próxima ou parar de ver
                 System.out.print("Escolha: ");
 
@@ -60,7 +62,15 @@ public class Main {
                             System.out.println("Alterar dados: \n");
                             funcoes.alterarDadosPerfil(scanner);
                             break;
+                        case 4:
+                            System.out.println("Excluir o perfil");
+                            funcoes.removerPerfil(scanner);
+                            break;
                         case 5:
+                            System.out.println("Login\n");
+                            funcoes.logarPerfil(scanner);
+                            break;
+                        case 6:
                             funcoes.realizarMissao(scanner);
                             break;
                         default:

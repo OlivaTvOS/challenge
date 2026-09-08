@@ -22,7 +22,7 @@ public class UsuarioDAO {
                 return rs.next();
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao verificar usuário: " + e.getMessage());
+            System.out.println("Erro ao verificar usuário: " + e.getMessage());
             return false;
         }
     }
@@ -90,7 +90,7 @@ public class UsuarioDAO {
         return false;
     }
 
-    public boolean alterarDadosUsuario(Cadastro alterar/* , String senhaAtualDigitada */) {
+    public boolean alterarDadosUsuario(Cadastro alterar) {
 
         String sqlUpdate = "UPDATE USUARIO SET NOME_USUARIO = ?, NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USUARIO = ?";
 
@@ -120,22 +120,63 @@ public class UsuarioDAO {
         }
     }
 
-    public boolean logarUsuario(String tabela, String coluna, String valor1, String coluna2, String valor2){
+    public boolean removerPerfil(int idUsuario, String senhaDigitada){
+        String sqlRemoverPerfil = "DELETE FROM USUARIO WHERE ID_USUARIO = ? AND SENHA = ?";
 
-        String sqlSelect = "SELECT 1 FROM " + tabela + " WHERE " + coluna + " = ? FETCH FIRST 1 ROWS ONLY";
+        try (PreparedStatement removerPerfil = connection.prepareStatement(sqlRemoverPerfil)) {
+            removerPerfil.setInt(1, idUsuario);
+            removerPerfil.setString(2, senhaDigitada);
 
-        /* String sqlUpdate "UPDATE USUARIO SET " */
+            int linhasAfetadas = removerPerfil.executeUpdate();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSelect)){
-            /* preparedStatement.setString(1, logar); */
+            if (linhasAfetadas > 0){
+                System.out.println("Perfil apagado com sucesso!");
 
-            try(ResultSet rs = preparedStatement.executeQuery()){
-                return rs.next();
+                SessaoUsuario.getInstance().setUsuario(null);
+
+                return true;
+            } else {
+                System.out.println("Não foi possível deletar o perfil!");
+                return false;
             }
-
+            
         } catch (SQLException e) {
             System.out.println("Erro ao conectar no banco! " + e.getMessage());
             return false;
         }
     }
+
+    public boolean logarUsuario(String emailDigitado, String senhaDigitada){
+
+        String sqlSelect = "SELECT ID_USUARIO, NOME_USUARIO, NOME, EMAIL FROM USUARIO WHERE LOWER(EMAIL) = ? AND LOWER(SENHA) = ?";
+
+        try (PreparedStatement buscarUsusario = connection.prepareStatement(sqlSelect)){
+            buscarUsusario.setString(1, emailDigitado);
+            buscarUsusario.setString(2, senhaDigitada);
+
+            try (ResultSet rs = buscarUsusario.executeQuery()){
+                if (rs.next()){
+                    Cadastro c = new Cadastro();
+
+                    c.setId(rs.getInt("ID_USUARIO")); 
+                    c.setNomeUsuario(rs.getString("NOME_USUARIO"));
+                    c.setNomeCompleto(rs.getString("NOME"));
+                    c.setEmail(rs.getString("EMAIL"));
+
+                    SessaoUsuario.getInstance().setUsuario(c);
+
+                    return true;
+                } else {
+                    System.out.println("[DEBUG] O Oracle executou a query, mas retornou VAZIO para esse email e senha.");
+                }
+            }
+        } catch (SQLException e){
+            System.out.println("Não foi possível se conectar com o banco! " + e.getMessage());
+            return false;
+        }
+        return false;
+    }
 }
+
+
+
