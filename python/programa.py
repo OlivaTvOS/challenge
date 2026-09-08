@@ -85,5 +85,7 @@ while rodando:
                 print(remove_usuario)
             else:
                 print("Usuário inexistente!")
+        case 5:
+            print()
         case _: 
             print("Opção inexistente")
