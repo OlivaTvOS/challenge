@@ -91,31 +91,8 @@ public class UsuarioDAO {
     }
 
     public boolean alterarDadosUsuario(Cadastro alterar/* , String senhaAtualDigitada */) {
-        // 1. Query para buscar a senha atual direto do banco de dados
-        /* String sqlBuscarSenha = "SELECT SENHA FROM USUARIO WHERE ID_USUARIO = ?"; */
-        // 2. Sua Query original de atualização
+
         String sqlUpdate = "UPDATE USUARIO SET NOME_USUARIO = ?, NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USUARIO = ?";
-
-        /* try {
-            // --- ETAPA 1: VERIFICAÇÃO DE SENHA ---
-            try (PreparedStatement stmtBusca = connection.prepareStatement(sqlBuscarSenha)) {
-                stmtBusca.setInt(1, alterar.getId());
-
-                try (ResultSet rs = stmtBusca.executeQuery()) {
-                    if (rs.next()) {
-                        String senhaDoBanco = rs.getString("SENHA");
-
-                        // Compara a senha do banco com a que o usuário acabou de digitar
-                        if (!senhaDoBanco.equals(senhaAtualDigitada)) {
-                            System.out.println("Aviso: A senha atual digitada está incorreta.");
-                            return false; // Cancela o método aqui e não altera nada
-                        }
-                    } else {
-                        System.out.println("Aviso: Usuário não encontrado no banco de dados.");
-                        return false;
-                    }
-                }
-            } */
 
             // --- ETAPA 2: ALTERAÇÃO DOS DADOS (Só executa se a senha bateu) ---
             try (PreparedStatement stmtUpdate = connection.prepareStatement(sqlUpdate)) {
@@ -139,6 +116,25 @@ public class UsuarioDAO {
                 }
             } catch (SQLException e) {
             System.out.println("Erro crítico no banco de dados: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean logarUsuario(String tabela, String coluna, String valor1, String coluna2, String valor2){
+
+        String sqlSelect = "SELECT 1 FROM " + tabela + " WHERE " + coluna + " = ? FETCH FIRST 1 ROWS ONLY";
+
+        /* String sqlUpdate "UPDATE USUARIO SET " */
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlSelect)){
+            /* preparedStatement.setString(1, logar); */
+
+            try(ResultSet rs = preparedStatement.executeQuery()){
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao conectar no banco! " + e.getMessage());
             return false;
         }
     }
