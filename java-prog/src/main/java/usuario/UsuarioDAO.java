@@ -12,7 +12,7 @@ public class UsuarioDAO {
         this.connection = connection;
     }
 
-    public boolean existeRegistro(String tabela, String coluna, String valor) {
+    public boolean existeUsuarioRegistro(String tabela, String coluna, String valor) {
         String sql = "SELECT 1 FROM " + tabela + " WHERE " + coluna + " = ? FETCH FIRST 1 ROWS ONLY";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -33,7 +33,7 @@ public class UsuarioDAO {
 
         // Tratamento novo para retornar o ID e manter a persistência da sessão em uma
         // conta criada
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"ID_USUARIO"})) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[] { "ID_USUARIO" })) {
 
             preparedStatement.setString(1, cadastro.getNomeUsuario());
             preparedStatement.setString(2, cadastro.getNomeCompleto());
@@ -90,18 +90,55 @@ public class UsuarioDAO {
         return false;
     }
 
-    public boolean alterarDadosUsuario(Cadastro alterar){
-        String sql = "UPDATE USUARIO SET NOME_USUARIO = ?";
+    public boolean alterarDadosUsuario(Cadastro alterar/* , String senhaAtualDigitada */) {
+        // 1. Query para buscar a senha atual direto do banco de dados
+        /* String sqlBuscarSenha = "SELECT SENHA FROM USUARIO WHERE ID_USUARIO = ?"; */
+        // 2. Sua Query original de atualização
+        String sqlUpdate = "UPDATE USUARIO SET NOME_USUARIO = ?, NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USUARIO = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setString(1, alterar.getNomeUsuario());
+        /* try {
+            // --- ETAPA 1: VERIFICAÇÃO DE SENHA ---
+            try (PreparedStatement stmtBusca = connection.prepareStatement(sqlBuscarSenha)) {
+                stmtBusca.setInt(1, alterar.getId());
 
-            int novosDados = preparedStatement.executeUpdate();
-            
-            return novosDados > 0;
-            
-        } catch (SQLException e) {
-            System.out.println("Erro! Não foi possível alterar os dados!");
+                try (ResultSet rs = stmtBusca.executeQuery()) {
+                    if (rs.next()) {
+                        String senhaDoBanco = rs.getString("SENHA");
+
+                        // Compara a senha do banco com a que o usuário acabou de digitar
+                        if (!senhaDoBanco.equals(senhaAtualDigitada)) {
+                            System.out.println("Aviso: A senha atual digitada está incorreta.");
+                            return false; // Cancela o método aqui e não altera nada
+                        }
+                    } else {
+                        System.out.println("Aviso: Usuário não encontrado no banco de dados.");
+                        return false;
+                    }
+                }
+            } */
+
+            // --- ETAPA 2: ALTERAÇÃO DOS DADOS (Só executa se a senha bateu) ---
+            try (PreparedStatement stmtUpdate = connection.prepareStatement(sqlUpdate)) {
+                stmtUpdate.setString(1, alterar.getNomeUsuario());
+                stmtUpdate.setString(2, alterar.getNomeCompleto());
+                stmtUpdate.setString(3, alterar.getEmail());
+                stmtUpdate.setString(4, alterar.getSenha()); // Nova senha
+                stmtUpdate.setInt(5, alterar.getId());
+
+                int linhasAfetadas = stmtUpdate.executeUpdate();
+
+                if (linhasAfetadas > 0) {
+                    System.out.println("Sucesso! Os dados foram alterados no banco.");
+
+                    // Só atualiza a sessão do aplicativo após confirmar o sucesso no banco
+                    SessaoUsuario.getInstance().setUsuario(alterar);
+                    return true;
+                } else {
+                    System.out.println("Erro: Não foi possível atualizar os dados.");
+                    return false;
+                }
+            } catch (SQLException e) {
+            System.out.println("Erro crítico no banco de dados: " + e.getMessage());
             return false;
         }
     }
