@@ -1,14 +1,34 @@
 def adicionar_usuario(funcionamento_usuario: dict, nome_usuario: str, nome_completo: str, email: str, senha_usuario: str) -> str:
 
-    funcionamento_usuario[nome_usuario] = {
-        "nome_completo": nome_completo,
-        "email": email,
-        "senha": senha_usuario,
-        "pontos": 0,
-        "missoes": {}
-    }
+    if not nome_usuario.strip():
+        return "Erro! Seu usuário não pode estar vazio!"
 
-    return "Usuário criado com sucesso!"
+    if not nome_completo.strip():
+        return "Erro! Você não pode deixar seu nome vazio"
+
+    if not email.strip():
+        return "Erro! Seu email não pode estar vazio"
+
+    if not senha_usuario.strip():
+        return "Erro! Você não pode deixar sua senha em branco"
+
+    try:
+        funcionamento_usuario[nome_usuario] = {
+            "nome_completo": nome_completo,
+            "email": email,
+            "senha": senha_usuario,
+            "pontos": 0,
+            "missoes": {}
+        }
+
+    except Exception as erro:
+        return f"Erro ao criar usuário: {erro}"
+
+    else:
+        return "Usuário criado com sucesso!"
+
+    finally:
+        print(f"[LOG] Tentativa de cadastro do usuário '{nome_usuario}' processada.")
 
 
 def consultar_usuario(funcionamento_usuario: dict, nome_usuario: str) -> str:
@@ -32,17 +52,34 @@ def atualizar_usuario(funcionamento_usuario: dict, nome_usuario: str, nome_compl
 
     if nome_usuario in funcionamento_usuario:
 
-        funcionamento_usuario[nome_usuario]["nome_completo"] = nome_completo
-        funcionamento_usuario[nome_usuario]["email"] = email
-        funcionamento_usuario[nome_usuario]["senha"] = senha_usuario
+        if not nome_completo.strip():
+            return "Erro! Você não pode deixar seu nome vazio"
 
-        return (
-            "\nUsuário atualizado com sucesso!"
-            f"\nNome de Usuário.....: {nome_usuario}"
-            f"\nNome completo......: {nome_completo}"
-            f"\nEmail..............: {email}"
-            f"\nSenha..............: {senha_usuario}"
-        )
+        if not email.strip():
+            return "Erro! Seu email não pode estar vazio"
+
+        if not senha_usuario.strip():
+            return "Erro! Você não pode deixar sua senha em branco"
+
+        try:
+            funcionamento_usuario[nome_usuario]["nome_completo"] = nome_completo
+            funcionamento_usuario[nome_usuario]["email"] = email
+            funcionamento_usuario[nome_usuario]["senha"] = senha_usuario
+
+        except Exception as erro:
+            return f"Erro ao atualizar usuário: {erro}"
+
+        else:
+            return (
+                "\nUsuário atualizado com sucesso!"
+                f"\nNome de Usuário.....: {nome_usuario}"
+                f"\nNome completo......: {nome_completo}"
+                f"\nEmail..............: {email}"
+                f"\nSenha..............: {senha_usuario}"
+            )
+
+        finally:
+            print(f"[LOG] Tentativa de atualização do usuário '{nome_usuario}' processada.")
 
     return "Este usuário não existe."
 
@@ -51,9 +88,17 @@ def remover_usuario(funcionamento_usuario: dict, nome_usuario: str) -> str:
 
     if nome_usuario in funcionamento_usuario:
 
-        funcionamento_usuario.pop(nome_usuario)
+        try:
+            funcionamento_usuario.pop(nome_usuario)
 
-        return "Usuário removido com sucesso!"
+        except Exception as erro:
+            return f"Erro ao remover usuário: {erro}"
+
+        else:
+            return "Usuário removido com sucesso!"
+
+        finally:
+            print(f"[LOG] Tentativa de remoção do usuário '{nome_usuario}' processada.")
 
     return "Usuário não foi removido."
 
@@ -130,11 +175,19 @@ def realizar_missao(usuarios_sistema: dict, missoes_sistema: dict, nome_usuario:
         ):
             return "Esta missão já está em andamento."
 
-        usuario["missoes"][id_missao] = {
-            "status": "EM_ANDAMENTO"
-        }
+        try:
+            usuario["missoes"][id_missao] = {
+                "status": "EM_ANDAMENTO"
+            }
 
-        return "Missão iniciada com sucesso!"
+        except Exception as erro:
+            return f"Erro ao iniciar missão: {erro}"
+
+        else:
+            return "Missão iniciada com sucesso!"
+
+        finally:
+            print(f"[LOG] Início de missão {id_missao} processado para '{nome_usuario}'.")
 
     if acao == "CONCLUIR":
 
@@ -144,14 +197,22 @@ def realizar_missao(usuarios_sistema: dict, missoes_sistema: dict, nome_usuario:
         if usuario["missoes"][id_missao]["status"] != "EM_ANDAMENTO":
             return "Esta missão não está em andamento."
 
-        usuario["missoes"][id_missao]["status"] = "CONCLUIDA"
-        usuario["pontos"] += missao["pontos"]
+        try:
+            usuario["missoes"][id_missao]["status"] = "CONCLUIDA"
+            usuario["pontos"] += missao["pontos"]
 
-        return (
-            "Missão concluída com sucesso!"
-            f"\nVocê recebeu {missao['pontos']} pontos."
-            f"\nTotal de pontos: {usuario['pontos']}"
-        )
+        except Exception as erro:
+            return f"Erro ao concluir missão: {erro}"
+
+        else:
+            return (
+                "Missão concluída com sucesso!"
+                f"\nVocê recebeu {missao['pontos']} pontos."
+                f"\nTotal de pontos: {usuario['pontos']}"
+            )
+
+        finally:
+            print(f"[LOG] Conclusão de missão {id_missao} processada para '{nome_usuario}'.")
 
     return "Ação inválida."
 
