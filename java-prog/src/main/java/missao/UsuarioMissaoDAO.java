@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsuarioMissaoDAO {
+public class UsuarioMissaoDAO implements IUsuarioMissaoDAO {
 
     private final Connection connection;
 
@@ -15,6 +15,7 @@ public class UsuarioMissaoDAO {
         this.connection = connection;
     }
 
+    @Override
     public boolean iniciarMissao(int idUsuario, int idMissao) {
 
         String sqlVerificar = "SELECT ID_USUARIO_MISSAO FROM USUARIO_MISSAO WHERE ID_USUARIO = ? AND ID_MISSAO = ? AND STATUS = 'EM_ANDAMENTO'";
@@ -53,6 +54,7 @@ public class UsuarioMissaoDAO {
         return false;
     }
 
+    @Override
     public Missao buscarMissaoEmAndamento(int idUsuario, int idMissao) {
 
         String sql = """
@@ -98,6 +100,7 @@ public class UsuarioMissaoDAO {
         return null;
     }
 
+    @Override
     public boolean concluirMissao(int idUsuario, int idMissao) {
 
         String sqlMissao = "SELECT PONTOS_RECOMPENSA FROM MISSAO WHERE ID_MISSAO = ?";
@@ -177,6 +180,7 @@ public class UsuarioMissaoDAO {
         }
     }
 
+    @Override
     public List<Missao> listarMissoesEmAndamento(int idUsuario) {
 
         List<Missao> missoes = new ArrayList<>();
@@ -211,6 +215,7 @@ public class UsuarioMissaoDAO {
         return missoes;
     }
 
+    @Override
     public boolean cancelarMissao(int idUsuario, int idMissao) {
 
         String sql = "UPDATE USUARIO_MISSAO SET STATUS = 'CANCELADA' WHERE ID_USUARIO = ? AND ID_MISSAO = ? AND STATUS = 'EM_ANDAMENTO'";

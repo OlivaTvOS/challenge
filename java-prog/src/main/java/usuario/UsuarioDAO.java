@@ -5,13 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UsuarioDAO {
+public class UsuarioDAO implements IUsuarioDAO {
     private final Connection connection;
 
     public UsuarioDAO(Connection connection) {
         this.connection = connection;
     }
 
+    @Override
     public boolean existeUsuarioRegistro(String tabela, String coluna, String valor) {
         String sql = "SELECT 1 FROM " + tabela + " WHERE " + coluna + " = ? FETCH FIRST 1 ROWS ONLY";
 
@@ -27,6 +28,7 @@ public class UsuarioDAO {
         }
     }
 
+    @Override
     public boolean criarUsuario(Cadastro cadastro) {
 
         String sql = "INSERT INTO USUARIO (NOME_USUARIO, NOME, EMAIL, SENHA) VALUES (?,?,?,?)";
@@ -65,6 +67,7 @@ public class UsuarioDAO {
         }
     }
 
+    @Override
     public boolean carregarDadosUsuario(int id) {
         String sql = "SELECT NOME_USUARIO, NOME, EMAIL FROM USUARIO WHERE ID_USUARIO = ?";
 
@@ -90,6 +93,7 @@ public class UsuarioDAO {
         return false;
     }
 
+    @Override
     public boolean alterarDadosUsuario(Cadastro alterar) {
 
         String sqlUpdate = "UPDATE USUARIO SET NOME_USUARIO = ?, NOME = ?, EMAIL = ?, SENHA = ? WHERE ID_USUARIO = ?";
@@ -120,6 +124,7 @@ public class UsuarioDAO {
         }
     }
 
+    @Override
     public boolean removerPerfil(int idUsuario, String senhaDigitada){
         String sqlRemoverPerfil = "DELETE FROM USUARIO WHERE ID_USUARIO = ? AND SENHA = ?";
 
@@ -146,6 +151,7 @@ public class UsuarioDAO {
         }
     }
 
+    @Override
     public boolean logarUsuario(String emailDigitado, String senhaDigitada){
 
         String sqlSelect = "SELECT ID_USUARIO, NOME_USUARIO, NOME, EMAIL FROM USUARIO WHERE LOWER(EMAIL) = ? AND LOWER(SENHA) = ?";
@@ -166,8 +172,6 @@ public class UsuarioDAO {
                     SessaoUsuario.getInstance().setUsuario(c);
 
                     return true;
-                } else {
-                    System.out.println("[DEBUG] O Oracle executou a query, mas retornou VAZIO para esse email e senha.");
                 }
             }
         } catch (SQLException e){

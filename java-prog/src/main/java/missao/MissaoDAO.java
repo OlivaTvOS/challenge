@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MissaoDAO {
+public class MissaoDAO implements IMissaoDAO {
 
     private final Connection connection;
 
@@ -16,6 +16,7 @@ public class MissaoDAO {
     }
 
     // CRIAR MISSÃO
+    @Override
     public boolean criarMissao(Missao missao) {
 
         String sql = "INSERT INTO MISSAO (ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA) VALUES (?, ?, ?, ?, ?)";
@@ -52,6 +53,7 @@ public class MissaoDAO {
     }
 
     // BUSCAR MISSÃO PELO ID
+    @Override
     public Missao buscarMissao(int idMissao) {
 
         String sql = "SELECT ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA FROM MISSAO WHERE ID_MISSAO = ?";
@@ -85,6 +87,7 @@ public class MissaoDAO {
     }
 
     // LISTAR TODAS AS MISSÕES ATIVAS
+    @Override
     public List<Missao> listarMissoes() {
 
         List<Missao> missoes = new ArrayList<>();
@@ -117,11 +120,12 @@ public class MissaoDAO {
     }
 
     // LISTAR MISSÕES POR CATEGORIA
+    @Override
     public List<Missao> listarMissoesPorCategoria(int idCategoria) {
 
         List<Missao> missoes = new ArrayList<>();
 
-        String sql = "SELECT ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA FROM MISSAO WHERE ID_CATEGORIA = ? AND ATIVA = 'S' ORDER ID_MISSAO ";
+        String sql = "SELECT ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA FROM MISSAO WHERE ID_CATEGORIA = ? AND ATIVA = 'S' ORDER BY ID_MISSAO";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -152,6 +156,7 @@ public class MissaoDAO {
     }
 
     // ATUALIZAR MISSÃO
+    @Override
     public boolean alterarMissao(Missao missao) {
 
         String sql = " UPDATE MISSAO SET ID_CATEGORIA = ?, TITULO = ?, DESCRICAO = ?, PONTOS_RECOMPENSA = ?, ATIVA = ? WHERE ID_MISSAO = ?";
@@ -180,6 +185,7 @@ public class MissaoDAO {
     }
 
     // DELETAR MISSÃO
+    @Override
     public boolean deletarMissao(int idMissao) {
 
         String sql = "DELETE FROM MISSAO WHERE ID_MISSAO = ?";
