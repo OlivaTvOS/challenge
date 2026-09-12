@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UsuarioDAO implements IUsuarioDAO {
     private final Connection connection;
@@ -179,6 +181,51 @@ public class UsuarioDAO implements IUsuarioDAO {
             return false;
         }
         return false;
+    }
+
+    @Override
+    public List<Cadastro> listarUsuarios() {
+        List<Cadastro> usuarios = new ArrayList<>();
+        String sql = "SELECT ID_USUARIO, NOME_USUARIO, NOME, EMAIL FROM USUARIO ORDER BY ID_USUARIO";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Cadastro cadastro = new Cadastro();
+                cadastro.setId(rs.getInt("ID_USUARIO"));
+                cadastro.setNomeUsuario(rs.getString("NOME_USUARIO"));
+                cadastro.setNomeCompleto(rs.getString("NOME"));
+                cadastro.setEmail(rs.getString("EMAIL"));
+                usuarios.add(cadastro);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar usuários: " + e.getMessage());
+        }
+        return usuarios;
+    }
+
+    @Override
+    public boolean alterarDadosBasicos(int idUsuario, String nomeCompleto, String email) {
+        String sql = "UPDATE USUARIO SET NOME = ?, EMAIL = ? WHERE ID_USUARIO = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, nomeCompleto);
+            stmt.setString(2, email);
+            stmt.setInt(3, idUsuario);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Erro ao alterar dados básicos: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean removerUsuarioComoFuncionario(int idUsuario) {
+        String sql = "DELETE FROM USUARIO WHERE ID_USUARIO = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Erro ao remover usuário: " + e.getMessage());
+            return false;
+        }
     }
 }
 

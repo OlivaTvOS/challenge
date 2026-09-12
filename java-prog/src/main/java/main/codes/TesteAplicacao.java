@@ -14,6 +14,16 @@ import missao.UsuarioMissaoDAO;
 import usuario.Cadastro;
 import usuario.IUsuarioDAO;
 import usuario.UsuarioDAO;
+import usuario.SessaoUsuario;
+import funcionario.AutorizacaoFuncionario;
+import funcionario.CargoFuncionario;
+import funcionario.Funcionario;
+import funcionario.FuncionarioDAO;
+import funcionario.GeradorCredenciais;
+import funcionario.IFuncionarioDAO;
+import funcionario.Permissao;
+import funcionario.SenhaUtil;
+import funcionario.SessaoFuncionario;
 
 /**
  * Classe de Teste exigida pela Sprint 3: um main() separado do Main.java
@@ -42,6 +52,7 @@ public class TesteAplicacao {
             IUsuarioDAO usuarioDAO = new UsuarioDAO(conn);
             IMissaoDAO missaoDAO = new MissaoDAO(conn);
             IUsuarioMissaoDAO usuarioMissaoDAO = new UsuarioMissaoDAO(conn);
+            IFuncionarioDAO funcionarioDAO = new FuncionarioDAO(conn);
 
             // --- TESTE 1: criar um usuário de teste ---
             System.out.println("--- Teste 1: criar usuário ---");
@@ -96,6 +107,37 @@ public class TesteAplicacao {
             System.out.println("\n--- Teste 7: remover usuário (limpeza dos dados de teste) ---");
             boolean removido = usuarioDAO.removerPerfil(usuarioTeste.getId(), usuarioTeste.getSenha());
             System.out.println("Usuário removido? " + removido);
+
+            System.out.println("\n--- Teste 8: criar funcionário com credenciais geradas ---");
+            int idFuncionario = funcionarioDAO.gerarIdDisponivel();
+            String emailFuncionario = funcionarioDAO.gerarEmail("Funcionario", "Teste");
+            String senhaFuncionario = GeradorCredenciais.gerarSenha();
+            Funcionario funcionarioTeste = new Funcionario(idFuncionario, "Funcionario", "Teste",
+                    emailFuncionario, SenhaUtil.gerarHash(senhaFuncionario), CargoFuncionario.ADMIN);
+            boolean funcionarioCriado = funcionarioDAO.cadastrar(funcionarioTeste);
+            System.out.println("Funcionário criado? " + funcionarioCriado);
+            System.out.println("ID entre 1 e 200? " + (idFuncionario >= 1 && idFuncionario <= 200));
+            System.out.println("Senha possui 10 caracteres? " + (senhaFuncionario.length() == 10));
+
+            System.out.println("\n--- Teste 9: login correto e incorreto ---");
+            Funcionario loginCorreto = funcionarioDAO.autenticar(idFuncionario, emailFuncionario, senhaFuncionario);
+            Funcionario loginIncorreto = funcionarioDAO.autenticar(idFuncionario, emailFuncionario, "senhaErrada");
+            System.out.println("Login correto funcionou? " + (loginCorreto != null));
+            System.out.println("Login incorreto foi negado? " + (loginIncorreto == null));
+
+            System.out.println("\n--- Teste 10: sessão e permissões ---");
+            SessaoUsuario.getInstance().logout();
+            SessaoFuncionario.getInstance().setFuncionario(loginCorreto);
+            System.out.println("Sessão de funcionário ativa? " + SessaoFuncionario.getInstance().estaLogado());
+            System.out.println("ADMIN pode excluir usuário? " + AutorizacaoFuncionario.autorizar(Permissao.EXCLUIR_USUARIO));
+            Funcionario tech = new Funcionario(0, "Tech", "Teste", "tech@kairos.com", "", CargoFuncionario.TECH);
+            SessaoFuncionario.getInstance().setFuncionario(tech);
+            System.out.println("TECH não pode excluir usuário? " + !AutorizacaoFuncionario.autorizar(Permissao.EXCLUIR_USUARIO));
+            Funcionario ceo = new Funcionario(0, "CEO", "Teste", "ceo@kairos.com", "", CargoFuncionario.CEO);
+            SessaoFuncionario.getInstance().setFuncionario(ceo);
+            System.out.println("CEO pode consultar resumo? " + AutorizacaoFuncionario.autorizar(Permissao.CONSULTAR_RESUMO));
+            SessaoFuncionario.getInstance().logout();
+            System.out.println("Logout de funcionário funcionou? " + !SessaoFuncionario.getInstance().estaLogado());
 
             System.out.println("\n===== FIM DOS TESTES =====");
 

@@ -14,10 +14,22 @@ import missao.Missao;
 import missao.UsuarioMissaoDAO;
 
 import java.util.List;
+import funcionario.AutorizacaoFuncionario;
+import funcionario.CargoFuncionario;
+import funcionario.Funcionario;
+import funcionario.FuncionarioDAO;
+import funcionario.GeradorCredenciais;
+import funcionario.Permissao;
+import funcionario.SenhaUtil;
+import funcionario.SessaoFuncionario;
 
-public class funcoes {
+public class Funcoes {
 
     public static void cadastrarUsuario(Scanner scanner) {
+        if (SessaoFuncionario.getInstance().estaLogado()) {
+            System.out.println("Faça logout do funcionário antes de cadastrar um usuário.");
+            return;
+        }
         // 1. Dados de configuração do banco (carregados antes para evitar abrir conexão
         // à toa)
         String url = DatabaseConfig.get("db.url");
@@ -270,6 +282,10 @@ public class funcoes {
     }
 
     public static void logarPerfil(Scanner scanner) {
+        if (SessaoFuncionario.getInstance().estaLogado()) {
+            System.out.println("Faça logout do funcionário antes de entrar como usuário.");
+            return;
+        }
         String url = DatabaseConfig.get("db.url");
         String usuario = DatabaseConfig.get("db.user");
         String senha = DatabaseConfig.get("db.password");
@@ -294,8 +310,8 @@ public class funcoes {
 
                 // Já valida no banco na mesma hora!
                 if (!usuarioDAO.existeUsuarioRegistro("USUARIO", "EMAIL", emailPerfil)) {
-                    System.out.println("Este email não existe! Escolha outro.\n");
-                    continue; // Volta para o início deste while para pedir o email de novo
+                    System.out.println("Este email não existe!.\n");
+                    break; // Volta para o início deste while para pedir o email de novo
                 }
 
                 break; // Se passou no empty e no banco, avança para a senha
@@ -471,5 +487,147 @@ public class funcoes {
         } catch (SQLException e) {
             System.out.println("Erro ao operar no banco: " + e.getMessage());
         }
+    }
+
+    public static void logoutUsuario() {
+        SessaoUsuario.getInstance().logout();
+        System.out.println("Logout realizado com sucesso.");
+    }
+
+    public static void cadastrarFuncionario(Scanner scanner) {
+        if (SessaoUsuario.getInstance().temUsuarioAtivo() || SessaoFuncionario.getInstance().estaLogado()) {
+            System.out.println("Faça logout antes de cadastrar um funcionário.");
+            return;
+        }
+
+        // Esta opção existe somente para demonstração acadêmica.
+        System.out.println("=========================================");
+        System.out.println("MODO DE DEMONSTRAÇÃO ACADÊMICA");
+        System.out.println("Cadastro de funcionários administrativos.");
+        System.out.println("Esta opção não estaria disponível publicamente.");
+        System.out.println("=========================================");
+        System.out.print("Nome: ");
+        String nome = scanner.nextLine().trim();
+        System.out.print("Último sobrenome: ");
+        String sobrenome = scanner.nextLine().trim();
+        if (nome.isEmpty() || sobrenome.isEmpty()) {
+            System.out.println("Nome e sobrenome são obrigatórios.");
+            return;
+        }
+        System.out.println("1 - ADMIN\n2 - TECH\n3 - CEO");
+        System.out.print("Cargo: ");
+        int opcao = scanner.nextInt();
+        scanner.nextLine();
+        CargoFuncionario cargo = switch (opcao) {
+            case 1 -> CargoFuncionario.ADMIN;
+            case 2 -> CargoFuncionario.TECH;
+            case 3 -> CargoFuncionario.CEO;
+            default -> null;
+        };
+        if (cargo == null) {
+            System.out.println("Cargo inválido.");
+            return;
+        }
+
+        try (Connection conn = abrirConexao()) {
+            FuncionarioDAO dao = new FuncionarioDAO(conn);
+            int id = dao.gerarIdDisponivel();
+            if (id == -1) {
+                System.out.println("Todos os IDs de 1 a 200 estão ocupados.");
+                return;
+            }
+            String email = dao.gerarEmail(nome, sobrenome);
+            String senhaGerada = GeradorCredenciais.gerarSenha();
+            Funcionario funcionario = new Funcionario(id, nome, sobrenome, email, SenhaUtil.gerarHash(senhaGerada), cargo);
+            if (dao.cadastrar(funcionario)) {
+                System.out.println("Funcionário criado com sucesso.\n");
+                System.out.println("ID: " + id);
+                System.out.println("E-mail: " + email);
+                System.out.println("Senha: " + senhaGerada);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao operar no banco: " + e.getMessage());
+        }
+    }
+
+    public static void logarFuncionario(Scanner scanner) {
+        if (SessaoUsuario.getInstance().temUsuarioAtivo()) {
+            System.out.println("Faça logout do usuário antes de entrar como funcionário.");
+            return;
+        }
+        System.out.print("ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        System.out.print("E-mail: ");
+        String email = scanner.nextLine();
+        System.out.print("Senha: ");
+        String senha = scanner.nextLine();
+        try (Connection conn = abrirConexao()) {
+            Funcionario funcionario = new FuncionarioDAO(conn).autenticar(id, email, senha);
+            if (funcionario == null) {
+                System.out.println("Credenciais inválidas.");
+                return;
+            }
+            SessaoFuncionario.getInstance().setFuncionario(funcionario);
+            System.out.println("Login de funcionário realizado com sucesso.");
+        } catch (SQLException e) {
+            System.out.println("Erro ao operar no banco.");
+        }
+    }
+
+    public static void logoutFuncionario() {
+        SessaoFuncionario.getInstance().logout();
+        System.out.println("Logout realizado com sucesso.");
+    }
+
+    public static void consultarUsuariosFuncionario() {
+        if (!AutorizacaoFuncionario.autorizar(Permissao.CONSULTAR_USUARIO)) return;
+        try (Connection conn = abrirConexao()) {
+            for (Cadastro cadastro : new UsuarioDAO(conn).listarUsuarios()) System.out.println(cadastro);
+        } catch (SQLException e) { System.out.println("Erro ao consultar usuários."); }
+    }
+
+    public static void editarUsuarioFuncionario(Scanner scanner) {
+        if (!AutorizacaoFuncionario.autorizar(Permissao.EDITAR_USUARIO)) return;
+        System.out.print("ID do usuário: ");
+        int id = scanner.nextInt(); scanner.nextLine();
+        System.out.print("Novo nome completo: ");
+        String nome = scanner.nextLine().trim();
+        System.out.print("Novo e-mail: ");
+        String email = scanner.nextLine().trim();
+        if (nome.isEmpty() || email.isEmpty()) { System.out.println("Nome e e-mail são obrigatórios."); return; }
+        try (Connection conn = abrirConexao()) {
+            System.out.println(new UsuarioDAO(conn).alterarDadosBasicos(id, nome, email) ? "Dados básicos atualizados." : "Usuário não atualizado.");
+        } catch (SQLException e) { System.out.println("Erro ao atualizar usuário."); }
+    }
+
+    public static void excluirUsuarioFuncionario(Scanner scanner) {
+        if (!AutorizacaoFuncionario.autorizar(Permissao.EXCLUIR_USUARIO)) return;
+        System.out.print("ID do usuário: ");
+        int id = scanner.nextInt(); scanner.nextLine();
+        try (Connection conn = abrirConexao()) {
+            System.out.println(new UsuarioDAO(conn).removerUsuarioComoFuncionario(id) ? "Usuário removido." : "Usuário não removido.");
+        } catch (SQLException e) { System.out.println("Erro ao remover usuário."); }
+    }
+
+    public static void consultarFuncionarios() {
+        if (!AutorizacaoFuncionario.autorizar(Permissao.CONSULTAR_FUNCIONARIO)) return;
+        try (Connection conn = abrirConexao()) {
+            for (Funcionario funcionario : new FuncionarioDAO(conn).listar()) System.out.println(funcionario);
+        } catch (SQLException e) { System.out.println("Erro ao consultar funcionários."); }
+    }
+
+    public static void consultarResumo() {
+        if (!AutorizacaoFuncionario.autorizar(Permissao.CONSULTAR_RESUMO)) return;
+        try (Connection conn = abrirConexao()) {
+            int totalUsuarios = new UsuarioDAO(conn).listarUsuarios().size();
+            int totalFuncionarios = new FuncionarioDAO(conn).listar().size();
+            System.out.println("Usuários cadastrados: " + totalUsuarios);
+            System.out.println("Funcionários cadastrados: " + totalFuncionarios);
+        } catch (SQLException e) { System.out.println("Erro ao consultar resumo."); }
+    }
+
+    private static Connection abrirConexao() throws SQLException {
+        return DriverManager.getConnection(DatabaseConfig.get("db.url"), DatabaseConfig.get("db.user"), DatabaseConfig.get("db.password"));
     }
 }

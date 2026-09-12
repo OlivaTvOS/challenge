@@ -1,88 +1,112 @@
 package main.codes;
 
-import minhas_funcoes.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import funcionario.CargoFuncionario;
+import funcionario.SessaoFuncionario;
+import minhas_funcoes.Funcoes;
+import usuario.SessaoUsuario;
+
 public class Main {
-    static void main() {
-        // Scanner gerenciado por try-with-resources (fecha automaticamente ao sair do
-        // programa)
+    public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             boolean continuar = true;
-
             while (continuar) {
-                // Até a 4 são exclusivamente funções para atender os requsitos de um CRUD
-                System.out.println("\n===== MENU =====");
-
-                System.out.println("0 - Sair"); // ✅ Feito
-
-                System.out.println("1 - Criar perfil"); // ✅ Feito
-
-                System.out.println("2 - Ver status do perfil"); // 👍 - Faltam Implemenações / Ver missões realizadas,
-                                                                // tipos de interação, quantidade de interações
-                                                                // (possivelmente com visualização de diferentes
-                                                                // perídos)
-
-                System.out.println("3 - Atualizar dados do perfil"); // Permite atualizar informações erradas digitadas
-                                                                     // pelo usuário (somente com confirmação dos
-                                                                     // dados).
-
-                System.out.println("4 - Deletar perfil"); // Apenas deleta o perfil do banco com confirmação dos dados
-                                                          // do usuário
-
-                System.out.println("5 - Logar no perfil");
-
-                System.out.println("6 - Realizar missão"); // Realizar missões engloba período de testes, adição no
-                                                           // ranking pós período, junção dos dados para geração do csv,
-                                                           // realização contínua de missões pós avaliação, aumento no
-                                                           // ranking, pontuação para cada missão
-
-                System.out.println("7 - Ver postagens"); // Ver postagens abrange dar curtidas, comentar, ir para
-                                                         // próxima ou parar de ver
-                System.out.print("Escolha: ");
-
                 try {
-                    int opcao = scanner.nextInt();
-                    scanner.nextLine();
-                    // Utilizando a sintaxe moderna do Switch (Java 14+)
-                    switch (opcao) {
-                        case 0:
-                            System.out.println("Saindo do sistema... Até logo!");
-                            continuar = false;
-                            break;
-                        case 1:
-                            funcoes.cadastrarUsuario(scanner);
-                            break;
-                        case 2:
-                            System.out.println("Exibindo dados: \n");
-                            funcoes.statusPerfil();
-                            break;
-                        case 3:
-                            System.out.println("Alterar dados: \n");
-                            funcoes.alterarDadosPerfil(scanner);
-                            break;
-                        case 4:
-                            System.out.println("Excluir o perfil");
-                            funcoes.removerPerfil(scanner);
-                            break;
-                        case 5:
-                            System.out.println("Login\n");
-                            funcoes.logarPerfil(scanner);
-                            break;
-                        case 6:
-                            funcoes.realizarMissao(scanner);
-                            break;
-                        default:
-                            System.out.println("Opção inválida! Tente novamente.");
-                            break;
+                    if (SessaoFuncionario.getInstance().estaLogado()) {
+                        menuFuncionario(scanner);
+                    } else if (SessaoUsuario.getInstance().temUsuarioAtivo()) {
+                        menuUsuario(scanner);
+                    } else {
+                        continuar = menuInicial(scanner);
                     }
                 } catch (InputMismatchException e) {
-                    System.out.println("Números, não letras! " + e.getMessage());
-                    scanner.nextLine(); // Limpa o buffer do teclado após ler o núme
+                    System.out.println("Digite apenas números.");
+                    scanner.nextLine();
                 }
-
             }
         }
+    }
+
+    private static boolean menuInicial(Scanner scanner) {
+        System.out.println("\n===== MENU INICIAL =====");
+        System.out.println("0 - Sair");
+        System.out.println("1 - Criar perfil de usuário");
+        System.out.println("2 - Entrar como usuário");
+        System.out.println("3 - Entrar como funcionário");
+        System.out.println("4 - Cadastrar funcionário (demonstração acadêmica)");
+        System.out.print("Escolha: ");
+        int opcao = scanner.nextInt(); scanner.nextLine();
+        switch (opcao) {
+            case 0:
+                System.out.println("Saindo do sistema... Até logo!"); 
+                return false;
+            case 1:
+                 Funcoes.cadastrarUsuario(scanner);
+                 break;
+            case 2:
+                 Funcoes.logarPerfil(scanner);
+                 break;
+            case 3:
+                 Funcoes.logarFuncionario(scanner);
+                 break;
+            case 4:
+                 Funcoes.cadastrarFuncionario(scanner);
+                 break;
+            default:
+                 System.out.println("Opção inválida.");
+                 break;
+        }
+        return true;
+    }
+
+    private static void menuUsuario(Scanner scanner) {
+        System.out.println("\n===== MENU DO USUÁRIO =====");
+        System.out.println("0 - Logout\n1 - Ver status\n2 - Atualizar dados\n3 - Excluir perfil\n4 - Realizar missão\n5 - Ver postagens");
+        System.out.print("Escolha: ");
+        int opcao = scanner.nextInt(); scanner.nextLine();
+        switch (opcao) {
+            case 0:
+                 Funcoes.logoutUsuario();
+                 break;
+            case 1:
+                 Funcoes.statusPerfil();
+                 break;
+            case 2:
+                 Funcoes.alterarDadosPerfil(scanner);
+                 break;
+            case 3: 
+                Funcoes.removerPerfil(scanner);
+                break;
+            case 4: 
+                Funcoes.realizarMissao(scanner);
+                break;
+            case 5:
+                 System.out.println("Sistema de postagens ainda não implementado.");
+                 break;
+            default:
+                 System.out.println("Opção inválida.");
+                 break;
+        }
+    }
+
+    private static void menuFuncionario(Scanner scanner) {
+        CargoFuncionario cargo = SessaoFuncionario.getInstance().getFuncionario().getCargo();
+        System.out.println("\n===== MENU DO FUNCIONÁRIO - " + cargo + " =====");
+        System.out.println("0 - Logout\n1 - Consultar usuários");
+        if (cargo == CargoFuncionario.ADMIN) System.out.println("2 - Editar dados básicos de usuário\n3 - Excluir usuário\n4 - Consultar funcionários\n5 - Visualizar resumo");
+        if (cargo == CargoFuncionario.TECH) System.out.println("2 - Editar dados básicos de usuário");
+        if (cargo == CargoFuncionario.CEO) System.out.println("2 - Visualizar resumo");
+        System.out.print("Escolha: ");
+        int opcao = scanner.nextInt(); scanner.nextLine();
+        if (opcao == 0) Funcoes.logoutFuncionario();
+        else if (opcao == 1) Funcoes.consultarUsuariosFuncionario();
+        else if (opcao == 2 && (cargo == CargoFuncionario.ADMIN || cargo == CargoFuncionario.TECH)) Funcoes.editarUsuarioFuncionario(scanner);
+        else if (opcao == 3 && cargo == CargoFuncionario.ADMIN) Funcoes.excluirUsuarioFuncionario(scanner);
+        else if (opcao == 4 && cargo == CargoFuncionario.ADMIN) Funcoes.consultarFuncionarios();
+        else if (opcao == 5 && cargo == CargoFuncionario.ADMIN) Funcoes.consultarResumo();
+        else if (opcao == 2 && cargo == CargoFuncionario.CEO) Funcoes.consultarResumo();
+        else System.out.println("Opção inválida ou acesso negado.");
     }
 }

@@ -1,5 +1,7 @@
 package usuario;
 
+import java.util.List;
+
 /**
  * Contrato das operações de persistência do usuário.
  * Existe para que a camada de regras de negócio (funcoes.java) dependa de um
@@ -21,4 +23,10 @@ public interface IUsuarioDAO {
     boolean removerPerfil(int idUsuario, String senhaDigitada);
 
     boolean logarUsuario(String emailDigitado, String senhaDigitada);
+
+    List<Cadastro> listarUsuarios();
+
+    boolean alterarDadosBasicos(int idUsuario, String nomeCompleto, String email);
+
+    boolean removerUsuarioComoFuncionario(int idUsuario);
 }

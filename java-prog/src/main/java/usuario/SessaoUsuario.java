@@ -24,4 +24,8 @@ public class SessaoUsuario {
     public boolean temUsuarioAtivo() {
         return this.usuarioLogado != null;
     }
+
+    public void logout() {
+        this.usuarioLogado = null;
+    }
 }
