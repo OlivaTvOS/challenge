@@ -5,16 +5,16 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
+import dao.IUsuarioDAO;
+import dao.MissaoDAO;
+import dao.UsuarioDAO;
+import dao.UsuarioMissaoDAO;
 import database.DatabaseConfig;
-import missao.IMissaoDAO;
-import missao.IUsuarioMissaoDAO;
-import missao.Missao;
-import missao.MissaoDAO;
-import missao.UsuarioMissaoDAO;
-import usuario.Cadastro;
-import usuario.IUsuarioDAO;
-import usuario.UsuarioDAO;
-import usuario.SessaoUsuario;
+import model.IMissaoDAO;
+import model.IUsuarioMissaoDAO;
+import model.Missao;
+import model.Cadastro;
+import model.SessaoUsuario;
 import funcionario.AutorizacaoFuncionario;
 import funcionario.CargoFuncionario;
 import funcionario.Funcionario;
@@ -35,7 +35,8 @@ import funcionario.SessaoFuncionario;
  * IMissaoDAO, IUsuarioMissaoDAO) e não pelo tipo concreto — é o principal
  * ganho prático de ter criado as interfaces: este teste depende só do
  * "contrato", não de como cada DAO resolve por dentro.
- */
+*/
+
 public class TesteAplicacao {
 
     public static void main(String[] args) {

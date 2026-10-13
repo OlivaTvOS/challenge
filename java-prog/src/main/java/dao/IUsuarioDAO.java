@@ -1,6 +1,8 @@
-package usuario;
+package dao;
 
 import java.util.List;
+
+import model.Cadastro;
 
 /**
  * Contrato das operações de persistência do usuário.
@@ -10,6 +12,7 @@ import java.util.List;
  * trocar a implementação (ex: outro banco, um mock para testes) sem precisar
  * mudar quem usa a DAO.
  */
+
 public interface IUsuarioDAO {
 
     boolean existeUsuarioRegistro(String tabela, String coluna, String valor);

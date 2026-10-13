@@ -1,4 +1,4 @@
-package missao;
+package model;
 
 public class Missao {
 

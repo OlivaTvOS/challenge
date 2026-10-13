@@ -1,4 +1,4 @@
-package missao;
+package model;
 
 import java.util.List;
 

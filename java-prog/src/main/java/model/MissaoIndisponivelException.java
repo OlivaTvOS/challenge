@@ -1,4 +1,4 @@
-package missao;
+package model;
 
 /**
  * Exceção específica para operações inválidas sobre uma missão — por

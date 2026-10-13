@@ -5,8 +5,8 @@ import java.util.Scanner;
 
 import funcionario.CargoFuncionario;
 import funcionario.SessaoFuncionario;
-import minhas_funcoes.Funcoes;
-import usuario.SessaoUsuario;
+import funcoes.Funcoes;
+import model.SessaoUsuario;
 
 public class Main {
     public static void main(String[] args) {
@@ -36,7 +36,7 @@ public class Main {
         System.out.println("2 - Entrar como usuário");
         System.out.println("3 - Entrar como funcionário");
         System.out.println("4 - Cadastrar funcionário (demonstração acadêmica)");
-        System.out.print("Escolha: ");
+        System.out.print("\nEscolha: ");
         int opcao = scanner.nextInt(); scanner.nextLine();
         switch (opcao) {
             case 0:

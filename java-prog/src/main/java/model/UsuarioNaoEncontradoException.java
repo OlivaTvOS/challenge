@@ -1,4 +1,4 @@
-package usuario;
+package model;
 
 /**
  * Exceção específica para quando uma operação espera encontrar um usuário

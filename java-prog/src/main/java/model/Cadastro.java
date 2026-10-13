@@ -1,4 +1,4 @@
-package usuario;
+package model;
 
 public class Cadastro {
 

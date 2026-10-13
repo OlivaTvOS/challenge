@@ -1,17 +1,17 @@
-package minhas_funcoes;
+package funcoes;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import dao.MissaoDAO;
+import dao.UsuarioDAO;
+import dao.UsuarioMissaoDAO;
 import database.DatabaseConfig;
-import missao.MissaoDAO;
-import usuario.Cadastro;
-import usuario.SessaoUsuario;
-import usuario.UsuarioDAO;
-import missao.Missao;
-import missao.UsuarioMissaoDAO;
+import model.Cadastro;
+import model.SessaoUsuario;
+import model.Missao;
 
 import java.util.List;
 import funcionario.AutorizacaoFuncionario;
