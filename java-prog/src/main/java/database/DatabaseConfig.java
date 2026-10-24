@@ -7,7 +7,7 @@ public class DatabaseConfig {
     private static Properties properties = new Properties();
 
     static {
-        try (FileInputStream input = new FileInputStream("local.properties")){
+        try (FileInputStream input = new FileInputStream("/home/artur-oliveira/Documentos/challenge/java-prog/local.properties")){
             properties.load(input);
         } catch (IOException e){
             System.out.println("O arquivo não existe!");

@@ -9,6 +9,7 @@ import java.util.List;
 
 import model.*;
 
+
 public class UsuarioDAO implements IUsuarioDAO {
     private final Connection connection;
 
