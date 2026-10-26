@@ -6,6 +6,8 @@ import { useAppData } from '../../core/AppDataContext';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { apiFecth } from '../../services/api';
+import Solucao from '../Solucao/Solucao';
 
 // Página de Login — chama login() e mostra erro real se não bater
 export default function Login() {
@@ -19,14 +21,26 @@ export default function Login() {
     formState: { errors },
   } = useForm<FormLoginData>();
 
-  function onSubmit(data: FormLoginData) {
-    setErroLogin('');
-    const resultado = login(data.email, data.senha);
-    if (!resultado.sucesso) {
-      setErroLogin(resultado.mensagem);
-      return;
-    }
-    navigate('/perfil');
+  const onSubmit = async(data: number) => {
+    /*try{
+
+      const perfilValido = await apiFecth(`/api/usuarios/${data}`, {
+        method: 'GET',
+      })
+
+
+      console.log("Usuário logado com sucesso", perfilValido)
+
+      alert(`Bem-vindo de volta, ${perfilValido.nomeCompleto}!`);
+
+      navigate('/perfil');
+
+    } catch(error: any) {
+      console.error("Erro ao fazer login", error)
+
+      alert("Usuário não encontrado! Verifique o ID digitado.");
+    }*/
+    
   }
 
   return (

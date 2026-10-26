@@ -11,10 +11,7 @@ import Cadastro from '../pages/Cadastro/Cadastro';
 import Perfil from '../pages/Perfil/Perfil';
 import Missoes from '../pages/Missoes/Missoes';
 import Ranking from '../pages/Ranking/Ranking';
-import FuncionarioLogin from '../pages/FuncionarioLogin/FuncionarioLogin';
-import FuncionarioCadastro from '../pages/FuncionarioCadastro/FuncionarioCadastro';
-import Funcionario from '../pages/Funcionario/Funcionario';
-import { RotaFuncionario, RotaSemFuncionario, RotaSemUsuario, RotaUsuario } from './RotasProtegidas';
+import { RotaUsuario } from './RotasProtegidas';
 
 // Definição central de todas as rotas do SoulUp
 export default function AppRoutes() {
@@ -31,19 +28,11 @@ export default function AppRoutes() {
         <Route path="/solucao" element={<Solucao />} />
 
         {/* Páginas da aplicação */}
-        <Route element={<RotaSemFuncionario />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+
         <Route element={<RotaUsuario />}>
           <Route path="/perfil" element={<Perfil />} />
-        </Route>
-        <Route element={<RotaSemUsuario />}>
-          <Route path="/login-funcionario" element={<FuncionarioLogin />} />
-          <Route path="/cadastro-funcionario" element={<FuncionarioCadastro />} />
-        </Route>
-        <Route element={<RotaFuncionario />}>
-          <Route path="/funcionario" element={<Funcionario />} />
         </Route>
         <Route path="/missoes" element={<Missoes />} />
         <Route path="/missoes/:id" element={<Missoes />} />

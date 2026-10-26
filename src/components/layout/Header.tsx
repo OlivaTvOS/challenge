@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAppData } from '../../core/AppDataContext';
 
 export default function Header() {
-  const { usuarioLogado, funcionarioLogado, logout, logoutFuncionario } = useAppData();
+  const { usuarioLogado, logout } = useAppData();
   const [menuAberto, setMenuAberto] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,13 +16,12 @@ export default function Header() {
     { to: '/contato', label: 'Contato' }, { to: '/integrantes', label: 'Integrantes' },
   ];
   const usuario = [{ to: '/missoes', label: 'Missões' }, { to: '/ranking', label: 'Ranking' }, { to: '/perfil', label: 'Perfil' }];
-  const funcionario = [{ to: '/funcionario', label: 'Painel do funcionário' }];
   const classeAtivo = 'text-aqua-400 font-medium';
   const classeInativo = 'text-dark-300 hover:text-aqua-400 transition-colors duration-300';
-  const linksSessao = funcionarioLogado ? funcionario : usuarioLogado ? usuario : [];
+  const linksSessao = usuarioLogado ? usuario : [];
 
   function sair() {
-    if (funcionarioLogado) logoutFuncionario(); else logout();
+    logout();
     navigate('/');
   }
 
@@ -30,7 +29,23 @@ export default function Header() {
     return <>
       {institucionais.map((link) => <NavLink key={link.to} to={link.to} className={({ isActive }) => isActive ? classeAtivo : classeInativo}>{link.label}</NavLink>)}
       {linksSessao.map((link) => <NavLink key={link.to} to={link.to} className={({ isActive }) => isActive ? classeAtivo : classeInativo}>{link.label}</NavLink>)}
-      {usuarioLogado || funcionarioLogado ? <button onClick={sair} className="text-dark-300 hover:text-red-400 text-sm">Sair</button> : <><NavLink to="/login" className={({ isActive }) => isActive ? classeAtivo : classeInativo}>Entrar</NavLink><NavLink to="/login-funcionario" className={({ isActive }) => isActive ? classeAtivo : classeInativo}>Funcionário</NavLink></>}
+      {usuarioLogado ? (
+      <button
+        onClick={sair}
+        className="text-dark-300 hover:text-red-400 text-sm"
+      >
+        Sair
+      </button>
+    ) : (
+      <NavLink
+        to="/login"
+        className={({ isActive }) =>
+          isActive ? classeAtivo : classeInativo
+        }
+      >
+        Entrar
+      </NavLink>
+    )}
     </>;
   }
 

@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import type { FormCadastroData } from '../../types';
-import { useAppData } from '../../core/AppDataContext';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { apiFecth } from '../../services/api';
 
 // Página de Cadastro — chama criarUsuario() e mostra erros específicos de cada validação
 export default function Cadastro() {
   const navigate = useNavigate();
-  const { criarUsuario } = useAppData();
-  const [erroCadastro, setErroCadastro] = useState('');
 
   const {
     register,
@@ -22,16 +19,26 @@ export default function Cadastro() {
 
   const senha = watch('senha');
 
-  function onSubmit(data: FormCadastroData) {
-    setErroCadastro('');
-    const resultado = criarUsuario(data.nomeUsuario, data.nomeCompleto, data.email, data.senha);
-    if (!resultado.sucesso) {
-      setErroCadastro(resultado.mensagem);
-      return;
-    }
-    // Cadastro com sucesso — já loga automaticamente e vai pro perfil
+  // Função para o envio do forms
+  const onSubmit = async(data: FormCadastroData) => {
+    try {
+
+      // Envia uma requisição ao caminho da API
+      await apiFecth('/api/usuarios/cadastrar', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      
+    alert('Usuário cadastrado com sucesso!');
     navigate('/perfil');
+
+  } catch (error){
+
+    console.error("Erro ao conectar a API: ", error)
+    alert("Falha ao salvar dados")
+
   }
+}
 
   return (
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
@@ -49,12 +56,6 @@ export default function Cadastro() {
       </div>
 
       <Card>
-        {/* Mensagem de erro do cadastro (validação de negócio) */}
-        {erroCadastro && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
-            {erroCadastro}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
