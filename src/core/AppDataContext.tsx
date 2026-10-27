@@ -10,7 +10,7 @@ type Resultado = { sucesso: boolean; mensagem: string };
 interface AppDataContextType {
   usuarioLogado: Usuario | null;
   criarUsuario: (nomeUsuario: string, nomeCompleto: string, email: string, senha: string) => Resultado;
-  login: (email: string, senha: string) => Resultado;
+  login: (usuario: any) => void;
   logout: () => void;
   statusPerfil: () => PerfilData | null;
   atualizarPerfil: (nomeUsuario: string, nomeCompleto: string, email: string, senha: string) => Resultado;
@@ -49,9 +49,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return { sucesso: true, mensagem: '' };
   }
 
-  function login(email: string, senha: string): Resultado {
-    const usuario = usuarios.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.senha === senha);
-    if (!usuario) return { sucesso: false, mensagem: 'Não foi possível logar no perfil.' };
+  const login = (usuario: any) => {
     setUsuarioLogado(usuario);
     return { sucesso: true, mensagem: '' };
   }

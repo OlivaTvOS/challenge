@@ -7,13 +7,12 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { apiFecth } from '../../services/api';
-import Solucao from '../Solucao/Solucao';
 
 // Página de Login — chama login() e mostra erro real se não bater
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAppData();
-  const [erroLogin, setErroLogin] = useState('');
+  const [erroLogin] = useState('');
 
   const {
     register,
@@ -21,25 +20,25 @@ export default function Login() {
     formState: { errors },
   } = useForm<FormLoginData>();
 
-  const onSubmit = async(data: number) => {
-    /*try{
+  // Post do dados (email e senha)
+  const onSubmit = async(data: FormLoginData) => {
+    try {
+      const usuarioLogado = await apiFecth(`/api/usuarios/login`, {
+        method: 'POST',
+        body: JSON.stringify(data), //Envio do email e senha
+      }) 
 
-      const perfilValido = await apiFecth(`/api/usuarios/${data}`, {
-        method: 'GET',
-      })
+      localStorage.setItem('@SoulUp:userId', usuarioLogado.id)
 
+      login(usuarioLogado)
 
-      console.log("Usuário logado com sucesso", perfilValido)
+      alert(`Bem-vindo de volta, ${usuarioLogado.nomeCompleto}!`);
 
-      alert(`Bem-vindo de volta, ${perfilValido.nomeCompleto}!`);
-
-      navigate('/perfil');
-
-    } catch(error: any) {
-      console.error("Erro ao fazer login", error)
-
-      alert("Usuário não encontrado! Verifique o ID digitado.");
-    }*/
+      navigate('/perfil')
+    } catch (error: any){
+      console.error("Erro no login: ", error)
+      alert(error.message || "E-mail ou senha incorretos!")
+    }
     
   }
 
