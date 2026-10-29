@@ -5,10 +5,12 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { apiFecth } from '../../services/api';
+import { useAppData } from '../../core/AppDataContext';
 
 // Página de Cadastro — chama criarUsuario() e mostra erros específicos de cada validação
 export default function Cadastro() {
   const navigate = useNavigate();
+  const { login } = useAppData();
 
   const {
     register,
@@ -24,12 +26,17 @@ export default function Cadastro() {
     try {
 
       // Envia uma requisição ao caminho da API
-      await apiFecth('/api/usuarios/cadastrar', {
+      const usuarioCriado = await apiFecth('/api/usuarios/cadastrar', {
         method: 'POST',
         body: JSON.stringify(data),
       });
-      
+    
+    localStorage.setItem('@SoulUp:userId', usuarioCriado.id);
+
+    login(usuarioCriado)
+    
     alert('Usuário cadastrado com sucesso!');
+
     navigate('/perfil');
 
   } catch (error){

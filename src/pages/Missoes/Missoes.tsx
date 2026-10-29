@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAppData } from '../../core/AppDataContext';
 import { categorias } from '../../data/categorias';
@@ -17,19 +17,59 @@ export default function Missoes() {
     listarMissoesDisponiveis,
     listarMissoesEmAndamento,
     listarMissoesConcluidas,
+    obterMissao,
     obterStatusMissao,
+    carregarMissoesUsuario,
     iniciarMissao,
     concluirMissao,
   } = useAppData();
-
-  // Guarda mensagens de feedback ao iniciar/concluir missão
   const [feedback, setFeedback] = useState<{ texto: string; tipo: 'erro' | 'sucesso' } | null>(null);
+  const [carregandoMissoes, setCarregandoMissoes] = useState(Boolean(usuarioLogado));
+  const [processandoAcao, setProcessandoAcao] = useState(false);
+  const idUsuario = usuarioLogado?.id;
+
+  useEffect(() => {
+    let cancelado = false;
+
+    if (!idUsuario) {
+      setCarregandoMissoes(false);
+      return;
+    }
+
+    setCarregandoMissoes(true);
+    void carregarMissoesUsuario().then((resultado) => {
+      if (!cancelado && !resultado.sucesso) {
+        setFeedback({ texto: resultado.mensagem, tipo: 'erro' });
+      }
+    }).finally(() => {
+      if (!cancelado) setCarregandoMissoes(false);
+    });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [idUsuario, carregarMissoesUsuario]);
+
+  async function executarAcao(acao: (idMissao: number) => Promise<{ sucesso: boolean; mensagem: string }>, idMissao: number) {
+    setProcessandoAcao(true);
+    setFeedback(null);
+    try {
+      const resultado = await acao(idMissao);
+      setFeedback({ texto: resultado.mensagem, tipo: resultado.sucesso ? 'sucesso' : 'erro' });
+    } catch (error: unknown) {
+      setFeedback({
+        texto: error instanceof Error ? error.message : 'Não foi possível atualizar a missão.',
+        tipo: 'erro',
+      });
+    } finally {
+      setProcessandoAcao(false);
+    }
+  }
 
   // --- Página de detalhes (tem id na URL) ---
   if (id) {
     const idMissao = Number(id);
-    const todasMissoes = listarMissoesDisponiveis();
-    const missao = todasMissoes.find((m) => m.id === idMissao);
+    const missao = obterMissao(idMissao);
 
     if (!missao) {
       return (
@@ -45,25 +85,8 @@ export default function Missoes() {
     const categoria = categorias.find((c) => c.nome === missao.categoria);
     const status = obterStatusMissao(idMissao);
 
-    function handleIniciar() {
-      setFeedback(null);
-      const resultado = iniciarMissao(idMissao);
-      if (!resultado.sucesso) {
-        setFeedback({ texto: resultado.mensagem, tipo: 'erro' });
-      } else {
-        setFeedback({ texto: 'Missão iniciada com sucesso!', tipo: 'sucesso' });
-      }
-    }
-
-    function handleConcluir() {
-      setFeedback(null);
-      const resultado = concluirMissao(idMissao);
-      if (!resultado.sucesso) {
-        setFeedback({ texto: resultado.mensagem, tipo: 'erro' });
-      } else {
-        setFeedback({ texto: `Missão concluída! +${missao!.pontosRecompensa} pontos ganhos!`, tipo: 'sucesso' });
-      }
-    }
+    const handleIniciar = () => executarAcao(iniciarMissao, idMissao);
+    const handleConcluir = () => executarAcao(concluirMissao, idMissao);
 
     const statusBadge = {
       DISPONIVEL: { texto: 'Disponível', cor: 'text-aqua-400 bg-aqua-500/10' },
@@ -120,16 +143,20 @@ export default function Missoes() {
             </div>
           )}
 
+          {carregandoMissoes && usuarioLogado && (
+            <p className="mb-4 text-sm text-dark-400">Carregando seu status nesta missão...</p>
+          )}
+
           {/* Botões de ação conforme o status */}
           <div className="flex flex-col sm:flex-row gap-3">
             {status === 'DISPONIVEL' && (
-              <Button variante="primario" className="w-full" onClick={handleIniciar}>
-                Iniciar missão
+              <Button variante="primario" className="w-full" onClick={handleIniciar} disabled={!usuarioLogado || carregandoMissoes || processandoAcao}>
+                {processandoAcao ? 'Iniciando...' : 'Iniciar missão'}
               </Button>
             )}
             {status === 'EM_ANDAMENTO' && (
-              <Button variante="primario" className="w-full" onClick={handleConcluir}>
-                Concluir missão
+              <Button variante="primario" className="w-full" onClick={handleConcluir} disabled={carregandoMissoes || processandoAcao}>
+                {processandoAcao ? 'Concluindo...' : 'Concluir missão'}
               </Button>
             )}
             {status === 'CONCLUIDA' && (
@@ -164,6 +191,15 @@ export default function Missoes() {
             <Button variante="primario">Entrar</Button>
           </Link>
         </Card>
+      )}
+
+      {feedback && (
+        <div className={`mb-6 p-3 rounded-xl text-sm ${feedback.tipo === 'erro'
+          ? 'bg-red-500/10 border border-red-500/20 text-red-400'
+          : 'bg-green-600/10 border border-green-600/20 text-green-500'
+          }`}>
+          {feedback.texto}
+        </div>
       )}
 
       <div className="space-y-10">

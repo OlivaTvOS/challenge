@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import type {
   Usuario, Missao, UsuarioMissao, RankingItem, PerfilData
 } from '../types';
 import { seedMissoes } from './seedMissoes';
 import { seedUsuarios } from './seedUsuarios';
+import { apiFecth } from '../services/api';
 
 type Resultado = { sucesso: boolean; mensagem: string };
 
@@ -13,14 +14,16 @@ interface AppDataContextType {
   login: (usuario: any) => void;
   logout: () => void;
   statusPerfil: () => PerfilData | null;
-  atualizarPerfil: (nomeUsuario: string, nomeCompleto: string, email: string, senha: string) => Resultado;
-  removerPerfil: (senha: string) => Resultado;
+  atualizarPerfil: (nomeUsuario: string, nomeCompleto: string, email: string, senha: string) => Promise<Resultado>;
+  removerPerfil: (senha: string) => Promise<Resultado>;
+  carregarMissoesUsuario: () => Promise<Resultado>;
   listarMissoesDisponiveis: () => Missao[];
   listarMissoesEmAndamento: (idUsuario: string) => Missao[];
   listarMissoesConcluidas: (idUsuario: string) => Missao[];
+  obterMissao: (idMissao: number) => Missao | undefined;
   obterStatusMissao: (idMissao: number) => 'DISPONIVEL' | 'EM_ANDAMENTO' | 'CONCLUIDA';
-  iniciarMissao: (idMissao: number) => Resultado;
-  concluirMissao: (idMissao: number) => Resultado;
+  iniciarMissao: (idMissao: number) => Promise<Resultado>;
+  concluirMissao: (idMissao: number) => Promise<Resultado>;
   listarRanking: () => RankingItem[];
 }
 
@@ -50,84 +53,193 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }
 
   const login = (usuario: any) => {
+    setUsuarioMissoes([]);
     setUsuarioLogado(usuario);
     return { sucesso: true, mensagem: '' };
   }
 
-  function logout() { setUsuarioLogado(null); }
+  function logout() {
+    setUsuarioLogado(null);
+    setUsuarioMissoes([]);
+  }
 
   function statusPerfil(): PerfilData | null {
     if (!usuarioLogado) return null;
-    const concluidas = usuarioMissoes.filter((um) => um.idUsuario === usuarioLogado.id && um.status === 'CONCLUIDA');
-    const emAndamento = usuarioMissoes.filter((um) => um.idUsuario === usuarioLogado.id && um.status === 'EM_ANDAMENTO');
+    const concluidas = usuarioMissoes.filter((um) => String(um.idUsuario) === String(usuarioLogado.id) && um.status === 'CONCLUIDA');
+    const emAndamento = usuarioMissoes.filter((um) => String(um.idUsuario) === String(usuarioLogado.id) && um.status === 'EM_ANDAMENTO');
     const total = concluidas.length + emAndamento.length;
     return { id: usuarioLogado.id, nomeUsuario: usuarioLogado.nomeUsuario, nomeCompleto: usuarioLogado.nomeCompleto, email: usuarioLogado.email, pontos: usuarioLogado.pontos, missoesConcluidas: concluidas.length, missoesEmAndamento: emAndamento.length, taxaConclusao: total === 0 ? 0 : Math.round((concluidas.length / total) * 100) };
   }
-  function atualizarPerfil(nomeUsuario: string, nomeCompleto: string, email: string, senha: string): Resultado {
-    if (!usuarioLogado) {
-      return {
-        sucesso: false,
-        mensagem: 'Você precisa estar logado como usuário.',
-      };
+
+  const atualizarPerfil = async(nomeUsuario: string, nomeCompleto: string, email: string, senha: string): Promise<Resultado> => {
+    const id = usuarioLogado?.id ?? localStorage.getItem('@SoulUp:userId');
+
+    if (!id) {
+      return { sucesso: false, mensagem: 'Você precisa estar logado para fazer alterações.' };
     }
-    if (![nomeUsuario, nomeCompleto, email, senha].every((valor) => valor.trim())) return { sucesso: false, mensagem: 'Todos os campos são obrigatórios.' };
-    if (usuarios.some((u) => u.id !== usuarioLogado.id && (u.nomeUsuario === nomeUsuario || u.email.toLowerCase() === email.toLowerCase()))) return { sucesso: false, mensagem: 'Nome de usuário ou e-mail já cadastrado.' };
-    const atualizado = { ...usuarioLogado, nomeUsuario, nomeCompleto, email, senha };
-    setUsuarios((prev) => prev.map((u) => u.id === atualizado.id ? atualizado : u));
-    setUsuarioLogado(atualizado);
-    return { sucesso: true, mensagem: '' };
-  }
-  function removerPerfil(senha: string): Resultado {
-    if (!usuarioLogado) {
-      return {
-        sucesso: false,
-        mensagem: 'Você precisa estar logado como usuário.',
-      };
+
+    try {
+      await apiFecth(`/api/usuarios/atualizar/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ nomeUsuario, nomeCompleto, email, senha})
+      })
+
+      return { sucesso: true, mensagem: "Alterações concluídas" };
+
+    } catch (error: unknown) {
+      const mensagem = error instanceof Error ? error.message : 'Não foi possível atualizar os dados da conta.';
+      return { sucesso: false, mensagem };
     }
-    if (senha !== usuarioLogado.senha) return { sucesso: false, mensagem: 'Senha incorreta. A conta não foi removida.' };
-    setUsuarios((prev) => prev.filter((u) => u.id !== usuarioLogado.id));
-    setUsuarioMissoes((prev) => prev.filter((um) => um.idUsuario !== usuarioLogado.id));
-    setUsuarioLogado(null);
-    return { sucesso: true, mensagem: '' };
   }
-  function listarMissoesDisponiveis() { return [...missoes]; }
-  function listarMissoesEmAndamento(idUsuario: string) { return usuarioMissoes.filter((um) => um.idUsuario === idUsuario && um.status === 'EM_ANDAMENTO').map((um) => missoes.find((m) => m.id === um.idMissao)).filter((m): m is Missao => !!m); }
-  function listarMissoesConcluidas(idUsuario: string) { return usuarioMissoes.filter((um) => um.idUsuario === idUsuario && um.status === 'CONCLUIDA').map((um) => missoes.find((m) => m.id === um.idMissao)).filter((m): m is Missao => !!m); }
+
+  const removerPerfil = async (senha: string): Promise<Resultado> => {
+    const id = usuarioLogado?.id ?? localStorage.getItem('@SoulUp:userId');
+
+    if (!id) {
+      return { sucesso: false, mensagem: 'Você precisa estar logado como usuário.' };
+    }
+
+    try {
+      await apiFecth(`/api/usuarios/remover/${id}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ senha }),
+      });
+
+      localStorage.removeItem('@SoulUp:userId');
+      
+      setUsuarioLogado(null);
+
+      return { sucesso: true, mensagem: '' };
+
+    } catch (error: unknown) {
+      const mensagem = error instanceof Error ? error.message : 'Não foi possível excluir a conta.';
+      return { sucesso: false, mensagem };
+    }
+  };
+
+
+  const carregarMissoesUsuario = useCallback(async (): Promise<Resultado> => {
+    const id = usuarioLogado?.id ?? localStorage.getItem('@SoulUp:userId');
+
+    if (!id) {
+      setUsuarioMissoes([]);
+      return { sucesso: true, mensagem: '' };
+    }
+
+    const idUsuario = Number(id);
+    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
+      return { sucesso: false, mensagem: 'O identificador do usuário é inválido.' };
+    }
+
+    try {
+      const [emAndamento, concluidas] = await Promise.all([
+        apiFecth(`/api/missoes/usuario/${idUsuario}/em-andamento`),
+        apiFecth(`/api/missoes/usuario/${idUsuario}/concluidas`),
+      ]);
+
+      setUsuarioMissoes([
+        ...(emAndamento ?? []).map((missao: { idMissao: number }) => ({
+          idUsuario: String(idUsuario),
+          idMissao: missao.idMissao,
+          status: 'EM_ANDAMENTO' as const,
+        })),
+        ...(concluidas ?? []).map((missao: { idMissao: number }) => ({
+          idUsuario: String(idUsuario),
+          idMissao: missao.idMissao,
+          status: 'CONCLUIDA' as const,
+        })),
+      ]);
+
+      return { sucesso: true, mensagem: '' };
+    } catch (error: unknown) {
+      const mensagem = error instanceof Error ? error.message : 'Não foi possível carregar suas missões.';
+      return { sucesso: false, mensagem };
+    }
+  }, [usuarioLogado?.id]);
+
+  function listarMissoesDisponiveis() {
+    const idsEmAndamentoOuConcluidos = new Set(
+      usuarioMissoes
+        .filter((missao) => String(missao.idUsuario) === String(usuarioLogado?.id))
+        .map((missao) => missao.idMissao),
+    );
+    return missoes.filter((missao) => !idsEmAndamentoOuConcluidos.has(missao.id));
+  }
+  function listarMissoesEmAndamento(idUsuario: string) { return usuarioMissoes.filter((um) => String(um.idUsuario) === String(idUsuario) && um.status === 'EM_ANDAMENTO').map((um) => missoes.find((m) => m.id === um.idMissao)).filter((m): m is Missao => !!m); }
+  function listarMissoesConcluidas(idUsuario: string) { return usuarioMissoes.filter((um) => String(um.idUsuario) === String(idUsuario) && um.status === 'CONCLUIDA').map((um) => missoes.find((m) => m.id === um.idMissao)).filter((m): m is Missao => !!m); }
+  function obterMissao(idMissao: number) { return missoes.find((missao) => missao.id === idMissao); }
   function obterStatusMissao(idMissao: number): 'DISPONIVEL' | 'EM_ANDAMENTO' | 'CONCLUIDA' {
     if (!usuarioLogado) return 'DISPONIVEL';
-    return usuarioMissoes.find((um) => um.idUsuario === usuarioLogado.id && um.idMissao === idMissao)?.status ?? 'DISPONIVEL';
+    return usuarioMissoes.find((um) => String(um.idUsuario) === String(usuarioLogado.id) && um.idMissao === idMissao)?.status ?? 'DISPONIVEL';
   }
-  function iniciarMissao(idMissao: number): Resultado {
-  if (!usuarioLogado) {
-      return {
-        sucesso: false,
-        mensagem: 'Você precisa estar logado como usuário.',
-      };
+  const iniciarMissao = async (idMissao: number): Promise<Resultado> => {
+    const id = usuarioLogado?.id ?? localStorage.getItem('@SoulUp:userId');
+
+    if (!id) {
+      return { sucesso: false, mensagem: 'Você precisa estar logado para realizar missões.' };
     }
-    if (usuarioMissoes.some((um) => um.idUsuario === usuarioLogado.id && um.idMissao === idMissao)) return { sucesso: false, mensagem: 'Você já iniciou esta missão.' };
-    setUsuarioMissoes((prev) => [...prev, { idUsuario: usuarioLogado.id, idMissao, status: 'EM_ANDAMENTO' }]);
-    return { sucesso: true, mensagem: '' };
+
+    const idUsuario = Number(id);
+    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
+      return { sucesso: false, mensagem: 'O identificador do usuário é inválido.' };
+    }
+
+    try {
+      await apiFecth(`/api/missoes/${idMissao}/iniciar`, {
+        method: 'POST',
+        body: JSON.stringify(idUsuario),
+      });
+
+      setUsuarioMissoes((anteriores) => [
+        ...anteriores.filter((missao) => missao.idMissao !== idMissao),
+        { idUsuario: String(idUsuario), idMissao, status: 'EM_ANDAMENTO' },
+      ]);
+
+      return { sucesso: true, mensagem: 'Missão iniciada.' };
+
+    } catch (error: unknown) {
+      const mensagem = error instanceof Error ? error.message : 'Não foi possível atualizar os dados da conta.';
+      return { sucesso: false, mensagem };
+    }
   }
-  function concluirMissao(idMissao: number): Resultado {
-  if (!usuarioLogado) {
-      return {
-        sucesso: false,
-        mensagem: 'Você precisa estar logado como usuário.',
-      };
+
+  const concluirMissao = async (idMissao: number): Promise<Resultado> => {
+    const id = usuarioLogado?.id ?? localStorage.getItem('@SoulUp:userId');
+
+    if (!id) {
+      return { sucesso: false, mensagem: 'Você precisa estar logado para concluir missões.' };
     }
-    if (!usuarioMissoes.some((um) => um.idUsuario === usuarioLogado.id && um.idMissao === idMissao && um.status === 'EM_ANDAMENTO')) return { sucesso: false, mensagem: 'Esta missão não está em andamento.' };
-    setUsuarioMissoes((prev) => prev.map((um) => um.idUsuario === usuarioLogado.id && um.idMissao === idMissao ? { ...um, status: 'CONCLUIDA' as const } : um));
-    const missao = missoes.find((m) => m.id === idMissao);
-    if (missao) {
-      const atualizado = { ...usuarioLogado, pontos: usuarioLogado.pontos + missao.pontosRecompensa };
-      setUsuarios((prev) => prev.map((u) => u.id === atualizado.id ? atualizado : u));
-      setUsuarioLogado(atualizado);
+
+    const idUsuario = Number(id);
+    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
+      return { sucesso: false, mensagem: 'O identificador do usuário é inválido.' };
     }
-    return { sucesso: true, mensagem: '' };
+
+    try {
+      await apiFecth(`/api/missoes/${idMissao}/concluir?idUsuario=${idUsuario}`, {
+        method: 'PUT',
+      });
+
+      setUsuarioMissoes((anteriores) => [
+        ...anteriores.filter((missao) => missao.idMissao !== idMissao),
+        { idUsuario: String(idUsuario), idMissao, status: 'CONCLUIDA' },
+      ]);
+
+      const pontosGanhos = missoes.find((missao) => missao.id === idMissao)?.pontosRecompensa ?? 0;
+      setUsuarioLogado((usuario) => usuario
+        ? { ...usuario, pontos: (usuario.pontos ?? 0) + pontosGanhos }
+        : usuario);
+
+      return { sucesso: true, mensagem: 'Missão concluída.' };
+    } catch (error: unknown) {
+      const mensagem = error instanceof Error ? error.message : 'Não foi possível concluir a missão.';
+      return { sucesso: false, mensagem };
+    }
   }
+
   function listarRanking(): RankingItem[] { return [...usuarios].sort((a, b) => b.pontos - a.pontos).map((u, index) => ({ posicao: index + 1, id: u.id, usuario: u.nomeUsuario, pontos: u.pontos })); }
 
-  return <AppDataContext.Provider value={{ usuarioLogado, criarUsuario, login, logout, statusPerfil, atualizarPerfil, removerPerfil, listarMissoesDisponiveis, listarMissoesEmAndamento, listarMissoesConcluidas, obterStatusMissao, iniciarMissao, concluirMissao, listarRanking }}>{children}</AppDataContext.Provider>;
+  return <AppDataContext.Provider value={{ usuarioLogado, criarUsuario, login, logout, statusPerfil, atualizarPerfil, removerPerfil, carregarMissoesUsuario, listarMissoesDisponiveis, listarMissoesEmAndamento, listarMissoesConcluidas, obterMissao, obterStatusMissao, iniciarMissao, concluirMissao, listarRanking }}>{children}</AppDataContext.Provider>;
 }
 
 export function useAppData() {

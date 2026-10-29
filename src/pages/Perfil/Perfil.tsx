@@ -62,9 +62,9 @@ export default function Perfil() {
     setEditando(true);
   }
 
-  function onSubmitEdicao(data: FormEditarPerfilData) {
+  async function onSubmitEdicao(data: FormEditarPerfilData) {
     setErroEdicao('');
-    const resultado = atualizarPerfil(data.nomeUsuario, data.nomeCompleto, data.email, data.senha);
+    const resultado = await atualizarPerfil(data.nomeUsuario, data.nomeCompleto, data.email, data.senha);
     if (!resultado.sucesso) {
       setErroEdicao(resultado.mensagem);
       return;
@@ -72,14 +72,13 @@ export default function Perfil() {
     setEditando(false);
   }
 
-  function onSubmitExclusao(data: { senha: string }) {
+  async function onSubmitExclusao(data: { senha: string }) {
     setErroExclusao('');
-    const resultado = removerPerfil(data.senha);
+    const resultado = await removerPerfil(data.senha);
     if (!resultado.sucesso) {
       setErroExclusao(resultado.mensagem);
       return;
     }
-    // Conta removida — redireciona para a Home
     navigate('/');
   }
 
