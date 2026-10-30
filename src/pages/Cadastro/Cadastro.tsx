@@ -1,16 +1,19 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import type { FormCadastroData } from '../../types';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
-import { apiFecth } from '../../services/api';
-import { useAppData } from '../../core/AppDataContext';
+import { apiFetch } from '../../services/api';
+import { useAppData } from '../../context/useAppData';
+import type { Usuario } from '../../types';
 
-// Página de Cadastro — chama criarUsuario() e mostra erros específicos de cada validação
+// Página de Cadastro — cria a conta pela API
 export default function Cadastro() {
   const navigate = useNavigate();
   const { login } = useAppData();
+  const [erroCadastro, setErroCadastro] = useState('');
 
   const {
     register,
@@ -23,29 +26,23 @@ export default function Cadastro() {
 
   // Função para o envio do forms
   const onSubmit = async(data: FormCadastroData) => {
+    setErroCadastro('');
     try {
 
       // Envia uma requisição ao caminho da API
-      const usuarioCriado = await apiFecth('/api/usuarios/cadastrar', {
+      const usuarioCriado = await apiFetch<Usuario>('/api/usuarios/cadastrar', {
         method: 'POST',
         body: JSON.stringify(data),
       });
-    
-    localStorage.setItem('@SoulUp:userId', usuarioCriado.id);
+      if (!usuarioCriado) throw new Error('A API não retornou os dados da conta criada.');
 
-    login(usuarioCriado)
-    
-    alert('Usuário cadastrado com sucesso!');
-
-    navigate('/perfil');
-
-  } catch (error){
-
-    console.error("Erro ao conectar a API: ", error)
-    alert("Falha ao salvar dados")
-
+      login(usuarioCriado);
+      navigate('/perfil');
+    } catch (error: unknown) {
+      console.error("Erro ao conectar a API: ", error);
+      setErroCadastro(error instanceof Error ? error.message : 'Não foi possível criar a conta.');
+    }
   }
-}
 
   return (
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
@@ -63,7 +60,11 @@ export default function Cadastro() {
       </div>
 
       <Card>
-
+        {erroCadastro && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
+            {erroCadastro}
+          </div>
+        )}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
             label="Nome de usuário"

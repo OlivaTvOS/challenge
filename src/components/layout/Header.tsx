@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useAppData } from '../../core/AppDataContext';
+import { useAppData } from '../../context/useAppData';
 
 export default function Header() {
   const { usuarioLogado, logout } = useAppData();

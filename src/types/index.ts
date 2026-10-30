@@ -15,11 +15,11 @@ export type StatusUsuarioMissao = 'EM_ANDAMENTO' | 'CONCLUIDA';
 
 // Interface que representa um usuário da plataforma
 export interface Usuario {
-  id: string;
+  id: string | number;
   nomeUsuario: string;
   nomeCompleto: string;
   email: string;
-  senha: string;
+  senha?: string;
   pontos: number;
 }
 
@@ -49,7 +49,7 @@ export interface RankingItem {
 
 // Dados do perfil (calculados a partir das relações de missão)
 export interface PerfilData {
-  id: string;
+  id: string | number;
   nomeUsuario: string;
   nomeCompleto: string;
   email: string;
@@ -102,6 +102,7 @@ export interface FormContatoData {
 
 // Informações de cada categoria (cor, ícone SVG, descrição)
 export interface InfoCategoria {
+  id: number;
   nome: CategoriaMissao;
   label: string;
   cor: string;

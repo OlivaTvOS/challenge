@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAppData } from '../../core/AppDataContext';
+import { useAppData } from '../../context/useAppData';
 import { categorias } from '../../data/categorias';
 import ListaMissoes from '../../components/missao/ListaMissoes';
 import Card from '../../components/ui/Card';
@@ -19,36 +19,38 @@ export default function Missoes() {
     listarMissoesConcluidas,
     obterMissao,
     obterStatusMissao,
+    carregarCatalogoMissoes,
     carregarMissoesUsuario,
     iniciarMissao,
     concluirMissao,
   } = useAppData();
   const [feedback, setFeedback] = useState<{ texto: string; tipo: 'erro' | 'sucesso' } | null>(null);
-  const [carregandoMissoes, setCarregandoMissoes] = useState(Boolean(usuarioLogado));
+  const [carregandoDados, setCarregandoDados] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState('');
   const [processandoAcao, setProcessandoAcao] = useState(false);
   const idUsuario = usuarioLogado?.id;
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     let cancelado = false;
 
-    if (!idUsuario) {
-      setCarregandoMissoes(false);
-      return;
-    }
-
-    setCarregandoMissoes(true);
-    void carregarMissoesUsuario().then((resultado) => {
-      if (!cancelado && !resultado.sucesso) {
-        setFeedback({ texto: resultado.mensagem, tipo: 'erro' });
-      }
+    setCarregandoDados(true);
+    setErroCarregamento('');
+    void Promise.all([
+      carregarCatalogoMissoes(),
+      idUsuario ? carregarMissoesUsuario() : Promise.resolve({ sucesso: true, mensagem: '' }),
+    ]).then(([catalogo, statusUsuario]) => {
+      if (cancelado) return;
+      const resultadoComFalha = [catalogo, statusUsuario].find((resultado) => !resultado.sucesso);
+      if (resultadoComFalha) setErroCarregamento(resultadoComFalha.mensagem);
     }).finally(() => {
-      if (!cancelado) setCarregandoMissoes(false);
+      if (!cancelado) setCarregandoDados(false);
     });
 
     return () => {
       cancelado = true;
     };
-  }, [idUsuario, carregarMissoesUsuario]);
+  }, [idUsuario, carregarCatalogoMissoes, carregarMissoesUsuario, tentativa]);
 
   async function executarAcao(acao: (idMissao: number) => Promise<{ sucesso: boolean; mensagem: string }>, idMissao: number) {
     setProcessandoAcao(true);
@@ -64,6 +66,25 @@ export default function Missoes() {
     } finally {
       setProcessandoAcao(false);
     }
+  }
+
+  if (carregandoDados) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center text-dark-400">
+        Carregando missões...
+      </div>
+    );
+  }
+
+  if (erroCarregamento) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+        <p className="mb-4 text-sm text-red-400">{erroCarregamento}</p>
+        <Button variante="secundario" onClick={() => setTentativa((valor) => valor + 1)}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
   }
 
   // --- Página de detalhes (tem id na URL) ---
@@ -143,19 +164,15 @@ export default function Missoes() {
             </div>
           )}
 
-          {carregandoMissoes && usuarioLogado && (
-            <p className="mb-4 text-sm text-dark-400">Carregando seu status nesta missão...</p>
-          )}
-
           {/* Botões de ação conforme o status */}
           <div className="flex flex-col sm:flex-row gap-3">
             {status === 'DISPONIVEL' && (
-              <Button variante="primario" className="w-full" onClick={handleIniciar} disabled={!usuarioLogado || carregandoMissoes || processandoAcao}>
+              <Button variante="primario" className="w-full" onClick={handleIniciar} disabled={!usuarioLogado || processandoAcao}>
                 {processandoAcao ? 'Iniciando...' : 'Iniciar missão'}
               </Button>
             )}
             {status === 'EM_ANDAMENTO' && (
-              <Button variante="primario" className="w-full" onClick={handleConcluir} disabled={carregandoMissoes || processandoAcao}>
+              <Button variante="primario" className="w-full" onClick={handleConcluir} disabled={processandoAcao}>
                 {processandoAcao ? 'Concluindo...' : 'Concluir missão'}
               </Button>
             )}

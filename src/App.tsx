@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import { AppDataProvider } from './core/AppDataContext';
+import { AppDataProvider } from './context/AppDataProvider';
 import AppRoutes from './routes/AppRoutes';
 
 // Componente principal — envolve a app com o Provider de dados e o Router

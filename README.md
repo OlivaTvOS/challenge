@@ -1,6 +1,6 @@
 # Kairós — SoulUp Front-End
 
-Aplicação acadêmica para desafio que usa missões, pontos e ranking para incentivar ações sustentáveis. A Sprint 3 migra a solução para uma SPA em React, Vite e TypeScript e demonstra autenticação e autorização de funcionários com três níveis de acesso.
+Aplicação acadêmica para o SoulUp que usa missões, pontos e ranking para incentivar ações sustentáveis. O front-end é uma SPA em React, Vite e TypeScript e consome a API Java para contas, missões e ranking global.
 
 ## Tecnologias utilizadas
 
@@ -16,21 +16,23 @@ Aplicação acadêmica para desafio que usa missões, pontos e ranking para ince
 - Cadastro, login, perfil e exclusão de usuário
 - Catálogo de missões, rota dinâmica por ID, início, conclusão e pontos
 - Ranking de usuários
-- Cadastro demonstrativo e login de funcionário por ID, e-mail e senha
-- Sessões exclusivas de usuário e funcionário
-- Permissões diferentes para ADMIN, TECH e CEO
+- Ranking global por pontos
+- Áreas de ranking por foco sustentável preparadas para futura integração com a API de classificação
 
 ## Estrutura de pastas
 
 ```text
 src/
   components/   componentes reutilizáveis de layout, interface e missões
-  core/         contexto da aplicação e dados iniciais
+  context/      estado compartilhado da aplicação
   data/         categorias e integrante
   pages/        componentes de página
   routes/       rotas estáticas, dinâmicas e proteções
+  services/     chamadas HTTP para as APIs
   types/        tipos e interfaces TypeScript
 ```
+
+O catálogo de missões é carregado do backend. Ao iniciar, a API cria as seis categorias e as 30 missões padrão somente quando necessário. O ranking global também é carregado da API Java; os rankings por foco aguardam um contrato de ranking na API de classificação.
 
 ## Como executar localmente
 
@@ -62,9 +64,9 @@ O layout usa Tailwind e foi estruturado para celular até 480 px, tablet a parti
 
 - GitHub da equipe: https://github.com/OlivaTvOS
 
-## Limitações
+## Integração de classificação
 
-Não há consumo de API nesta Sprint. Os dados ficam no estado React e são reiniciados ao recarregar a página. A proteção no navegador serve como demonstração acadêmica; o sistema publicado irá refatorar a persistência de dados na Sprint 4.
+A API Python atual expõe previsões de cluster e aprovação de missão. Ela ainda não fornece dados nem endpoints de ranking por foco; por isso, o front-end mantém essas opções identificadas como futuras e não simula posições ou pontuações.
 
 ## Registro de apoio de IA
 

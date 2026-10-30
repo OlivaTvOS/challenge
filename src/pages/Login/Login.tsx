@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import type { FormLoginData } from '../../types';
-import { useAppData } from '../../core/AppDataContext';
+import { useAppData } from '../../context/useAppData';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
-import { apiFecth } from '../../services/api';
+import { apiFetch } from '../../services/api';
+import type { Usuario } from '../../types';
 
 // Página de Login — chama login() e mostra erro real se não bater
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAppData();
-  const [erroLogin] = useState('');
+  const [erroLogin, setErroLogin] = useState('');
 
   const {
     register,
@@ -22,22 +23,20 @@ export default function Login() {
 
   // Post do dados (email e senha)
   const onSubmit = async(data: FormLoginData) => {
+    setErroLogin('');
     try {
-      const usuarioLogado = await apiFecth(`/api/usuarios/login`, {
+      const usuarioLogado = await apiFetch<Usuario>('/api/usuarios/login', {
         method: 'POST',
         body: JSON.stringify(data), //Envio do email e senha
-      }) 
+      });
+      if (!usuarioLogado) throw new Error('A API não retornou os dados da conta.');
 
-      localStorage.setItem('@SoulUp:userId', usuarioLogado.id)
-
-      login(usuarioLogado)
-
-      alert(`Bem-vindo de volta, ${usuarioLogado.nomeCompleto}!`);
+      login(usuarioLogado);
 
       navigate('/perfil')
-    } catch (error: any){
+    } catch (error: unknown) {
       console.error("Erro no login: ", error)
-      alert(error.message || "E-mail ou senha incorretos!")
+      setErroLogin(error instanceof Error ? error.message : "E-mail ou senha incorretos!");
     }
     
   }

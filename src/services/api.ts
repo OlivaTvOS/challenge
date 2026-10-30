@@ -1,5 +1,4 @@
-// Função auxiliar de chamada
-export const apiFecth = async (endpoint: string, options?: RequestInit) => {
+export const apiFetch = async <T = unknown>(endpoint: string, options?: RequestInit): Promise<T | null> => {
     const response = await fetch(endpoint, {
         ...options,
         headers: {
@@ -9,9 +8,9 @@ export const apiFecth = async (endpoint: string, options?: RequestInit) => {
     })
 
     if (!response.ok){
-        const errorText = await response.text(); // <--- Funciona como um console.log pra verificação do erro de retorno vindo do Java
-        throw new Error(`Erro na requisição: ${response.status} - ${errorText}`);
+        const errorText = (await response.text()).trim();
+        throw new Error(errorText || 'Não foi possível concluir a solicitação.');
     }
 
-    return response.status !== 204 ? await response.json() : null
+    return response.status !== 204 ? await response.json() as T : null;
 }

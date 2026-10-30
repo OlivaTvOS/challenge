@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useAppData } from '../../core/AppDataContext';
+import { useAppData } from '../../context/useAppData';
 import type { FormEditarPerfilData } from '../../types';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -12,7 +12,14 @@ import Input from '../../components/ui/Input';
 
 // Página de Perfil — mostra dados reais do usuarioLogado, com editar e excluir conta
 export default function Perfil() {
-  const { statusPerfil, atualizarPerfil, removerPerfil, listarMissoesConcluidas, usuarioLogado } = useAppData();
+  const {
+    statusPerfil,
+    atualizarPerfil,
+    removerPerfil,
+    listarMissoesConcluidas,
+    carregarMissoesUsuario,
+    usuarioLogado,
+  } = useAppData();
   const navigate = useNavigate();
 
   // Estados para controlar os modais de editar e excluir
@@ -20,6 +27,17 @@ export default function Perfil() {
   const [excluindo, setExcluindo] = useState(false);
   const [erroEdicao, setErroEdicao] = useState('');
   const [erroExclusao, setErroExclusao] = useState('');
+  const [erroMissoes, setErroMissoes] = useState('');
+
+  useEffect(() => {
+    let cancelado = false;
+    void carregarMissoesUsuario().then((resultado) => {
+      if (!cancelado && !resultado.sucesso) setErroMissoes(resultado.mensagem);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [carregarMissoesUsuario]);
 
   // Form de edição
   const {
@@ -57,7 +75,7 @@ export default function Perfil() {
       nomeUsuario: perfil!.nomeUsuario,
       nomeCompleto: perfil!.nomeCompleto,
       email: perfil!.email,
-      senha: usuarioLogado!.senha,
+      senha: usuarioLogado!.senha ?? '',
     });
     setEditando(true);
   }
@@ -125,6 +143,10 @@ export default function Perfil() {
       </div>
 
       {/* Barra de progresso da taxa de conclusão */}
+      {erroMissoes && (
+        <p className="mb-4 text-sm text-red-400">{erroMissoes}</p>
+      )}
+
       <Card className="mb-8">
         <h3 className="text-sm font-medium text-dark-200 mb-3">Taxa de conclusão</h3>
         <div className="w-full h-3 rounded-full bg-dark-700 overflow-hidden">

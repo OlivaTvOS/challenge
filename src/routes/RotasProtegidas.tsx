@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAppData } from '../core/AppDataContext';
+import { useAppData } from '../context/useAppData';
 
 export function RotaUsuario() {
   const { usuarioLogado } = useAppData();
