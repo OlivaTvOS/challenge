@@ -1,16 +1,13 @@
-import os
+import json
 
-import subalgoritmos
-from missoes import missoes_sistema
+import api_java
+import api_externa
 
 
-usuarios_sistema = {}
-funcionarios_sistema = {}
 sessao_usuario = None
-sessao_funcionario = None
 
 
-def ler_numero(mensagem: str):
+def ler_numero(mensagem):
     """Lê um número inteiro e informa entradas inválidas."""
     try:
         return int(input(mensagem))
@@ -20,174 +17,316 @@ def ler_numero(mensagem: str):
 
 
 def cadastrar_usuario():
-    nome_usuario = input("Digite seu nome de usuário: ").lower()
-    nome_completo = input("Digite seu nome completo: ")
-    email = input("Digite seu e-mail: ")
-    senha = input("Digite sua senha: ")
-    if nome_usuario in usuarios_sistema:
-        print("Erro! Este nome de usuário está em uso.")
-    elif any(dados["email"].lower() == email.lower() for dados in usuarios_sistema.values()):
-        print("Erro! Este e-mail já está cadastrado.")
-    else:
-        print(subalgoritmos.adicionar_usuario(usuarios_sistema, nome_usuario, nome_completo, email, senha))
+    """Cadastra um usuário na API Java."""
+    global sessao_usuario
+    nome_usuario = input("Nome de usuário: ").strip()
+    nome_completo = input("Nome completo: ")
+    email = input("E-mail: ")
+    senha = input("Senha: ")
 
-
-def cadastrar_funcionario():
-    if sessao_usuario or sessao_funcionario:
-        print("Faça logout antes de cadastrar um funcionário.")
-        return
-    # Esta opção existe somente para demonstração acadêmica.
-    # Em um sistema real, o cadastro administrativo não seria público.
-    print("\n=========================================")
-    print("MODO DE DEMONSTRAÇÃO ACADÊMICA")
-    print("Esta opção demonstra a criação de uma")
-    print("conta de funcionário. Em um sistema real,")
-    print("ela não estaria disponível publicamente.")
-    print("=========================================")
-    nome = input("Nome: ")
-    sobrenome = input("Último sobrenome: ")
-    print("1 - ADMIN\n2 - TECH\n3 - CEO")
-    cargo = {1: "ADMIN", 2: "TECH", 3: "CEO"}.get(ler_numero("Cargo: "))
-    resultado = subalgoritmos.adicionar_funcionario(funcionarios_sistema, nome, sobrenome, cargo)
-    print(resultado["mensagem"])
-    if resultado["sucesso"]:
-        print(f"\nID: {resultado['id']}\nE-mail: {resultado['email']}\nSenha: {resultado['senha']}")
+    try:
+        sessao_usuario = api_java.cadastrar_usuario(
+            nome_usuario,
+            nome_completo,
+            email,
+            senha,
+        )
+        if not isinstance(sessao_usuario, dict) or "id" not in sessao_usuario:
+            print("A API não retornou os dados da conta criada.")
+            sessao_usuario = None
+            return
+        print("Usuário cadastrado com sucesso.")
+        menu_usuario()
+    except RuntimeError as erro:
+        print(erro)
 
 
 def entrar_usuario():
+    """Autentica um usuário pela API Java."""
     global sessao_usuario
-    if sessao_funcionario:
-        print("Um funcionário está logado. Faça logout antes de entrar como usuário.")
-        return
-    nome = subalgoritmos.autenticar_usuario(usuarios_sistema, input("E-mail: "), input("Senha: "))
-    if nome is None:
-        print("Credenciais inválidas.")
-        return
-    sessao_usuario = nome
-    print("Login realizado com sucesso.")
-    menu_usuario()
-
-
-def entrar_funcionario():
-    global sessao_funcionario
-    if sessao_usuario:
-        print("Um usuário está logado. Faça logout antes de entrar como funcionário.")
-        return
-    id_funcionario = ler_numero("ID: ")
-    if id_funcionario is None:
-        return
-    funcionario = subalgoritmos.autenticar_funcionario(funcionarios_sistema, id_funcionario, input("E-mail: "), input("Senha: "))
-    if funcionario is None:
-        print("Credenciais inválidas.")
-        return
-    sessao_funcionario = funcionario
-    print("Login de funcionário realizado com sucesso.")
-    menu_funcionario()
+    email = input("E-mail: ")
+    senha = input("Senha: ")
+    try:
+        sessao_usuario = api_java.entrar_usuario(email, senha)
+        if not isinstance(sessao_usuario, dict) or "id" not in sessao_usuario:
+            print("A API não retornou os dados da conta.")
+            sessao_usuario = None
+            return
+        print("Login realizado com sucesso.")
+        menu_usuario()
+    except RuntimeError as erro:
+        print(erro)
 
 
 def realizar_missao_usuario():
-    usuario = usuarios_sistema[sessao_usuario]
-    em_andamento = subalgoritmos.listar_missoes_em_andamento(usuario, missoes_sistema)
-    if em_andamento:
-        print("\n===== MISSÕES EM ANDAMENTO =====")
-        print(em_andamento)
-    print("\n===== MISSÕES DISPONÍVEIS =====")
-    print(subalgoritmos.listar_missoes(missoes_sistema))
-    id_missao = ler_numero("Digite o ID da missão: ")
-    if id_missao is None or id_missao not in missoes_sistema:
+    """Consulta, organiza e permite atualizar as missões do usuário."""
+    try:
+        em_andamento = api_java.listar_missoes_em_andamento(sessao_usuario["id"])
+        concluidas = api_java.listar_missoes_concluidas(sessao_usuario["id"])
+        missoes = api_java.listar_missoes()
+    except RuntimeError as erro:
+        print(erro)
+        return
+
+    grupos = organizar_missoes(em_andamento, concluidas, missoes)
+    for grupo in grupos:
+        if grupo["missoes"] or grupo["situacao"] == "Disponíveis":
+            print(f"\n===== MISSÕES {grupo['situacao'].upper()} =====")
+            exibir_missoes(grupo["missoes"])
+
+    id_missao = ler_numero("ID da missão: ")
+    if id_missao is None:
+        return
+
+    missao_selecionada = filtrar_missao_por_id(missoes, id_missao)
+    if missao_selecionada is None:
         print("Missão inexistente.")
         return
-    print(subalgoritmos.exibir_missao(missoes_sistema, id_missao))
-    acao = input("Digite I para iniciar ou C para concluir: ").upper()
-    if acao in ("I", "C"):
-        comando = "INICIAR" if acao == "I" else "CONCLUIR"
-        print(subalgoritmos.realizar_missao(usuarios_sistema, missoes_sistema, sessao_usuario, id_missao, comando))
-    else:
-        print("Ação inválida.")
+
+    exibir_missao(missao_selecionada)
+    acao = input("Ação (I para iniciar, C para concluir): ").upper()
+    try:
+        if acao == "I":
+            resposta = api_java.iniciar_missao(sessao_usuario["id"], id_missao)
+        elif acao == "C":
+            resposta = api_java.concluir_missao(sessao_usuario["id"], id_missao)
+        else:
+            print("Ação inválida.")
+            return
+        if not isinstance(resposta, dict) or "message" not in resposta:
+            print("A API Java retornou uma resposta inválida.")
+            return
+        print(resposta["message"])
+    except RuntimeError as erro:
+        print(erro)
+
+
+def exibir_missoes(missoes):
+    """Exibe os registros de uma lista de dicionários de missões."""
+    if not missoes:
+        print("Nenhuma missão encontrada.")
+        return
+
+    for missao in missoes:
+        categoria = api_java.CATEGORIAS.get(
+            missao["idCategoria"],
+            str(missao["idCategoria"]),
+        )
+        print(
+            f"\nID: {missao['idMissao']}"
+            f"\nTítulo: {missao['titulo']}"
+            f"\nCategoria: {categoria}"
+            f"\nPontos: {missao['pontosRecompensa']}"
+            "\n------------------------"
+        )
+
+
+def exibir_missao(missao):
+    """Exibe os dados de um dicionário de missão."""
+    categoria = api_java.CATEGORIAS.get(
+        missao["idCategoria"],
+        str(missao["idCategoria"]),
+    )
+    print(
+        "\n===== MISSÃO SELECIONADA ====="
+        f"\nID: {missao['idMissao']}"
+        f"\nTítulo: {missao['titulo']}"
+        f"\nCategoria: {categoria}"
+        f"\nDescrição: {missao['descricao']}"
+        f"\nPontos: {missao['pontosRecompensa']}"
+    )
+
+
+def exibir_ranking():
+    """Consulta e exibe a sequência de registros do ranking."""
+    try:
+        ranking = api_java.listar_ranking_global()
+    except RuntimeError as erro:
+        print(erro)
+        return
+
+    if not ranking:
+        print("Nenhum usuário cadastrado.")
+        return
+
+    for item in ranking:
+        print(
+            f"\n{item['posicao']}º - {item['usuario']}: "
+            f"{item['pontos']} pontos"
+        )
+
+
+def exportar_consultas_json():
+    """Exporta consultas do perfil e das missões para um arquivo JSON."""
+    id_usuario = sessao_usuario["id"]
+    try:
+        perfil = api_java.buscar_perfil(id_usuario)
+        em_andamento = api_java.listar_missoes_em_andamento(id_usuario)
+        concluidas = api_java.listar_missoes_concluidas(id_usuario)
+    except RuntimeError as erro:
+        print(erro)
+        return
+
+    if not isinstance(perfil, dict):
+        print("A API Java retornou os dados do perfil em formato inválido.")
+        return
+
+    campos_perfil = ("id", "nomeUsuario", "nomeCompleto", "email", "pontos")
+    perfil_exportado = {}
+    for campo in campos_perfil:
+        if campo not in perfil:
+            print("A API Java retornou os dados do perfil incompletos.")
+            return
+        perfil_exportado[campo] = perfil[campo]
+
+    dados = {
+        "perfil": perfil_exportado,
+        "missoes_em_andamento": em_andamento,
+        "missoes_concluidas": concluidas,
+    }
+    nome_arquivo = f"consultas_usuario_{id_usuario}.json"
+    try:
+        with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
+            json.dump(dados, arquivo, ensure_ascii=False, indent=4)
+        print(f"Consultas exportadas para {nome_arquivo}.")
+    except OSError as erro:
+        print(f"Não foi possível salvar o arquivo JSON: {erro}")
+
+
+def consultar_clima():
+    """Consulta o clima atual em coordenadas informadas pelo usuário."""
+    try:
+        latitude = float(input("Latitude: ").replace(",", "."))
+        longitude = float(input("Longitude: ").replace(",", "."))
+    except ValueError:
+        print("Informe latitude e longitude numéricas.")
+        return
+
+    if latitude < -90 or latitude > 90:
+        print("A latitude deve estar entre -90 e 90.")
+        return
+    if longitude < -180 or longitude > 180:
+        print("A longitude deve estar entre -180 e 180.")
+        return
+
+    try:
+        clima = api_externa.consultar_clima(latitude, longitude)
+        print(
+            "\nClima atual para planejar atividades ao ar livre"
+            f"\nTemperatura: {clima['temperature_2m']} °C"
+            f"\nPrecipitação: {clima['precipitation']} mm"
+        )
+    except (RuntimeError, KeyError) as erro:
+        print(erro)
+
+
+def organizar_missoes(em_andamento, concluidas, disponiveis):
+    """Agrupa as listas de missões em uma sequência de dicionários."""
+    return [
+        {"situacao": "Em andamento", "missoes": em_andamento},
+        {"situacao": "Concluídas", "missoes": concluidas},
+        {"situacao": "Disponíveis", "missoes": disponiveis},
+    ]
+
+
+def filtrar_missao_por_id(missoes, id_missao):
+    """Retorna da lista a missão que corresponde ao identificador informado."""
+    for missao in missoes:
+        if missao["idMissao"] == id_missao:
+            return missao
+    return None
 
 
 def menu_usuario():
+    """Apresenta as operações disponíveis para a sessão autenticada."""
     global sessao_usuario
     while sessao_usuario:
         print("\n===== MENU DO USUÁRIO =====")
-        print("0 - Logout\n1 - Ver status do perfil\n2 - Atualizar dados do perfil\n3 - Excluir perfil\n4 - Realizar missão\n5 - Ver postagens")
+        print(
+            "0 - Logout\n1 - Ver perfil\n2 - Atualizar perfil\n"
+            "3 - Excluir perfil\n4 - Realizar missão\n5 - Ver ranking\n"
+            "6 - Exportar consultas para JSON\n7 - Consultar clima"
+        )
         opcao = ler_numero("Escolha: ")
         if opcao is None:
             continue
         match opcao:
             case 0:
+                # A sessão termina sem remover a conta do banco.
                 sessao_usuario = None
                 print("Logout realizado com sucesso.")
             case 1:
-                print(subalgoritmos.consultar_usuario(usuarios_sistema, sessao_usuario))
+                # O perfil traz os pontos persistidos após a conclusão das missões.
+                try:
+                    perfil = api_java.buscar_perfil(sessao_usuario["id"])
+                    if not isinstance(perfil, dict):
+                        print("A API Java retornou os dados do perfil em formato inválido.")
+                        continue
+                    print(
+                        f"\nNome de usuário: {perfil['nomeUsuario']}"
+                        f"\nNome completo: {perfil['nomeCompleto']}"
+                        f"\nE-mail: {perfil['email']}"
+                        f"\nPontos: {perfil['pontos']}"
+                    )
+                except RuntimeError as erro:
+                    print(erro)
             case 2:
-                nome = input("Novo nome completo: ")
-                email = input("Novo e-mail: ")
+                nome_atual = sessao_usuario["nomeUsuario"]
+                nome_usuario = input(f"Nome de usuário ({nome_atual}): ").strip()
+                if not nome_usuario:
+                    nome_usuario = nome_atual
+                nome = input("Nome completo: ")
+                email = input("E-mail: ")
                 senha = input("Nova senha: ")
-                duplicado = any(usuario != sessao_usuario and dados["email"].lower() == email.lower() for usuario, dados in usuarios_sistema.items())
-                print("Este e-mail já está cadastrado." if duplicado else subalgoritmos.atualizar_usuario(usuarios_sistema, sessao_usuario, nome, email, senha))
+                try:
+                    # A API valida duplicidade sem bloquear os dados da própria conta.
+                    id_usuario = sessao_usuario["id"]
+                    api_java.atualizar_perfil(
+                        id_usuario,
+                        nome_usuario,
+                        nome,
+                        email,
+                        senha,
+                    )
+                    perfil_atualizado = api_java.buscar_perfil(id_usuario)
+                    if not isinstance(perfil_atualizado, dict):
+                        print("A API Java retornou os dados do perfil em formato inválido.")
+                        continue
+                    sessao_usuario = perfil_atualizado
+                    print("Dados do perfil atualizados com sucesso.")
+                except RuntimeError as erro:
+                    print(erro)
             case 3:
-                if input("Digite sua senha para excluir o perfil: ") != usuarios_sistema[sessao_usuario]["senha"]:
-                    print("Senha incorreta.")
-                else:
-                    print(subalgoritmos.remover_usuario(usuarios_sistema, sessao_usuario))
+                # A senha é verificada pela API antes de excluir a conta.
+                senha = input("Senha para excluir o perfil: ")
+                try:
+                    resposta = api_java.remover_perfil(sessao_usuario["id"], senha)
+                    if not isinstance(resposta, dict) or "message" not in resposta:
+                        print("A API Java retornou uma resposta inválida.")
+                        continue
+                    print(resposta["message"])
                     sessao_usuario = None
+                except RuntimeError as erro:
+                    print(erro)
             case 4:
                 realizar_missao_usuario()
             case 5:
-                print(subalgoritmos.interagir_postagens())
+                exibir_ranking()
+            case 6:
+                exportar_consultas_json()
+            case 7:
+                consultar_clima()
             case _:
                 print("Opção inexistente.")
 
 
-def menu_funcionario():
-    global sessao_funcionario
-    while sessao_funcionario:
-        cargo = sessao_funcionario["cargo"]
-        print(f"\n===== MENU DO FUNCIONÁRIO - {cargo} =====")
-        print("0 - Logout\n1 - Consultar usuários")
-        if cargo in ("ADMIN", "TECH"):
-            print("2 - Atualizar dados básicos de usuário")
-        if cargo == "ADMIN":
-            print("3 - Excluir usuário\n4 - Consultar funcionários\n5 - Visualizar resumo")
-        elif cargo == "TECH":
-            print("3 - Consultar missões de usuário")
-        else:
-            print("2 - Visualizar ranking\n3 - Visualizar resumo")
-        opcao = ler_numero("Escolha: ")
-        if opcao is None:
-            continue
-        if opcao == 0:
-            sessao_funcionario = None
-            print("Logout realizado com sucesso.")
-        elif opcao == 1:
-            print(subalgoritmos.listar_usuarios_funcionario(usuarios_sistema, sessao_funcionario))
-        elif opcao == 2 and cargo in ("ADMIN", "TECH"):
-            usuario = input("Nome do usuário: ").lower()
-            print(subalgoritmos.atualizar_usuario_funcionario(usuarios_sistema, sessao_funcionario, usuario, input("Novo nome completo: "), input("Novo e-mail: ")))
-        elif opcao == 3 and cargo == "ADMIN":
-            print(subalgoritmos.remover_usuario_funcionario(usuarios_sistema, sessao_funcionario, input("Nome do usuário: ").lower()))
-        elif opcao == 4 and cargo == "ADMIN":
-            print(subalgoritmos.listar_funcionarios(funcionarios_sistema, sessao_funcionario))
-        elif opcao == 5 and cargo == "ADMIN":
-            print(subalgoritmos.obter_resumo(usuarios_sistema, missoes_sistema, sessao_funcionario))
-        elif opcao == 3 and cargo == "TECH":
-            print(subalgoritmos.consultar_missoes_usuario(usuarios_sistema, sessao_funcionario, input("Nome do usuário: ").lower()))
-        elif opcao == 2 and cargo == "CEO":
-            print(subalgoritmos.listar_ranking(usuarios_sistema, sessao_funcionario))
-        elif opcao == 3 and cargo == "CEO":
-            print(subalgoritmos.obter_resumo(usuarios_sistema, missoes_sistema, sessao_funcionario))
-        else:
-            print("Opção inexistente ou acesso negado.")
-
-
 def menu_principal():
-    os.system("cls")
+    """Apresenta as opções de cadastro, login e encerramento."""
     rodando = True
     while rodando:
         print("\n===== MENU INICIAL =====")
-        print("0 - Sair\n1 - Criar perfil\n2 - Entrar como usuário\n3 - Entrar como funcionário\n4 - Cadastrar funcionário")
-        opcao = ler_numero("Digite a opção desejada: ")
+        print("0 - Sair\n1 - Criar perfil\n2 - Entrar")
+        opcao = ler_numero("Escolha: ")
         if opcao is None:
             continue
         match opcao:
@@ -195,13 +334,12 @@ def menu_principal():
                 print("Encerrando")
                 rodando = False
             case 1:
-                print("Faça logout do funcionário antes de criar um usuário.") if sessao_funcionario else cadastrar_usuario()
+                if sessao_usuario:
+                    print("Faça logout antes de criar outro perfil.")
+                else:
+                    cadastrar_usuario()
             case 2:
                 entrar_usuario()
-            case 3:
-                entrar_funcionario()
-            case 4:
-                cadastrar_funcionario()
             case _:
                 print("Opção inexistente.")
 

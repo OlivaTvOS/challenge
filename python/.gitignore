@@ -1,2 +1,3 @@
 .gitignore/
 __pycache__/
+consultas_usuario_*.json
