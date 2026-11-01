@@ -1,0 +1,86 @@
+-- Sprint 4 - Consultas SQL do SoulUp/Kairos
+-- Executar depois de modelo.sql e sprint4_carga_inicial.sql.
+-- Cada consulta tem uma descricao simples do que apresenta.
+
+-- 1. Ranking geral de usuarios
+-- Exibe a posicao, o nome de usuario e os pontos registrados no ranking.
+SELECT
+    R.POSICAO,
+    U.ID_USUARIO,
+    U.NOME_USUARIO,
+    R.PONTOS,
+    R.NIVEL
+FROM RANKING R
+INNER JOIN USUARIO U
+    ON U.ID_USUARIO = R.ID_USUARIO
+WHERE U.TIPO_USUARIO = 'USUARIO'
+ORDER BY R.POSICAO;
+
+-- 2. Historico de missoes por usuario
+-- Mostra as missoes iniciadas ou concluidas e a categoria de cada uma.
+SELECT
+    U.NOME_USUARIO,
+    M.ID_MISSAO,
+    M.TITULO,
+    C.NOME AS CATEGORIA,
+    UM.STATUS,
+    UM.DATA_INICIO,
+    UM.DATA_CONCLUSAO,
+    UM.PONTOS_RECEBIDOS
+FROM USUARIO_MISSAO UM
+INNER JOIN USUARIO U
+    ON U.ID_USUARIO = UM.ID_USUARIO
+INNER JOIN MISSAO M
+    ON M.ID_MISSAO = UM.ID_MISSAO
+INNER JOIN CATEGORIA C
+    ON C.ID_CATEGORIA = M.ID_CATEGORIA
+WHERE UM.STATUS IN ('EM_ANDAMENTO', 'CONCLUIDA')
+ORDER BY UM.DATA_INICIO DESC;
+
+-- 3. Publicacoes e interacoes
+-- Lista publicacoes e as interacoes recebidas, quando existirem.
+SELECT
+    P.ID_PUBLICACAO,
+    U.NOME_USUARIO,
+    P.CONTEUDO,
+    P.STATUS_VERIFICACAO,
+    I.TIPO_INTERACAO,
+    I.CONTEUDO AS TEXTO_INTERACAO,
+    I.DATA_INTERACAO
+FROM PUBLICACAO P
+INNER JOIN USUARIO U
+    ON U.ID_USUARIO = P.ID_USUARIO
+LEFT JOIN INTERACAO I
+    ON I.ID_PUBLICACAO = P.ID_PUBLICACAO
+WHERE P.STATUS_VERIFICACAO <> 'REJEITADA'
+ORDER BY P.DATA_PUBLICACAO DESC, P.ID_PUBLICACAO;
+
+-- 4. Quantidade de missoes e pontuacao por categoria
+-- Apresenta quantidade, soma e media dos pontos de recompensa.
+SELECT
+    C.NOME AS CATEGORIA,
+    COUNT(M.ID_MISSAO) AS QUANTIDADE_MISSOES,
+    SUM(M.PONTOS_RECOMPENSA) AS SOMA_PONTOS,
+    AVG(M.PONTOS_RECOMPENSA) AS MEDIA_PONTOS
+FROM CATEGORIA C
+LEFT JOIN MISSAO M
+    ON M.ID_CATEGORIA = C.ID_CATEGORIA
+    AND M.ATIVA = 'S'
+WHERE C.ID_CATEGORIA BETWEEN 1 AND 6
+GROUP BY C.ID_CATEGORIA, C.NOME
+ORDER BY QUANTIDADE_MISSOES DESC, C.NOME;
+
+-- 5. Perfil comportamental registrado por usuario
+-- Exibe a categoria associada ao perfil e o nivel de confianca salvo.
+SELECT
+    U.NOME_USUARIO,
+    C.NOME AS CATEGORIA,
+    PU.NIVEL_CONFIANCA,
+    PU.DATA_CLASSIFICACAO
+FROM PERFIL_USUARIO PU
+INNER JOIN USUARIO U
+    ON U.ID_USUARIO = PU.ID_USUARIO
+INNER JOIN CATEGORIA C
+    ON C.ID_CATEGORIA = PU.ID_CATEGORIA
+WHERE PU.NIVEL_CONFIANCA IS NOT NULL
+ORDER BY U.NOME_USUARIO, PU.NIVEL_CONFIANCA DESC;
