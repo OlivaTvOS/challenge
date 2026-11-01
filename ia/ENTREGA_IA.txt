@@ -1,0 +1,26 @@
+ENTREGA 4 - ARTIFICIAL INTELLIGENCE & CHATBOT
+
+Integrante
+RM569870 - Artur da Silva de Oliveira
+
+Arquivos da entrega
+- modelos_soulup.ipynb: treinamento, avaliação e discussão dos dois modelos.
+- modelos_soulup.joblib: K-Means, Random Forest, escalonador e configurações da API.
+- dataset_code.py: API REST Flask para agrupamento e classificação de perfis.
+- dataset/soulup_dataset.csv: base utilizada para treinar e avaliar os modelos.
+
+Modelos
+1. K-Means agrupa usuários conforme as quantidades de missões por categoria e a taxa de conclusão. Foram usados StandardScaler, cinco grupos e random_state 42. A silhueta foi aproximadamente 0,404 e o Adjusted Rand Index em relação ao perfil de referência foi aproximadamente 0,889. O K-Means não usa os perfis para formar os grupos; eles servem apenas para interpretar os grupos depois do treinamento.
+2. Random Forest classifica o perfil de referência a partir das seis quantidades de missões por categoria. Em uma divisão estratificada de treino e teste (80%/20%), com random_state 42, obteve acurácia de 0,975 no conjunto de teste (78 de 80 registros).
+
+API
+- GET / verifica a disponibilidade.
+- POST /predict/cluster agrupa o usuário com K-Means e informa o perfil de referência mais frequente no grupo.
+- POST /predict/perfil prevê o perfil com a Random Forest.
+- A API é iniciada localmente com: python dataset_code.py
+
+Os resultados descrevem somente a base CSV disponibilizada. A origem dos registros não está documentada no arquivo e as previsões não devem ser tratadas como conclusões garantidas sobre usuários reais. O notebook apresenta a avaliação, os erros e as limitações.
+
+Bibliotecas necessárias: pandas, scikit-learn, joblib e Flask.
+Para instalar: pip install pandas scikit-learn joblib Flask
+O artefato foi treinado com scikit-learn 1.7.2; use a mesma versão para evitar incompatibilidade de serialização.
