@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useAppData } from '../../core/AppDataContext';
+import { useAppData } from '../../context/useAppData';
 import type { FormEditarPerfilData } from '../../types';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -10,18 +10,35 @@ import { IconeCategoria } from '../../components/ui/Icones';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
-// Página de Perfil — mostra dados reais do usuarioLogado, com editar e excluir conta
 export default function Perfil() {
-  const { statusPerfil, atualizarPerfil, removerPerfil, listarMissoesConcluidas, usuarioLogado } = useAppData();
+  const {
+    statusPerfil,
+    atualizarPerfil,
+    removerPerfil,
+    listarMissoesConcluidas,
+    carregarMissoesUsuario,
+    usuarioLogado,
+  } = useAppData();
   const navigate = useNavigate();
 
-  // Estados para controlar os modais de editar e excluir
   const [editando, setEditando] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
   const [erroEdicao, setErroEdicao] = useState('');
   const [erroExclusao, setErroExclusao] = useState('');
+  const [erroMissoes, setErroMissoes] = useState('');
 
-  // Form de edição
+  useEffect(() => {
+    let cancelado = false;
+    void carregarMissoesUsuario().then((resultado) => {
+      if (!cancelado && !resultado.sucesso) {
+        setErroMissoes(resultado.mensagem);
+      }
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [carregarMissoesUsuario]);
+
   const {
     register: registerEditar,
     handleSubmit: handleEditar,
@@ -29,7 +46,6 @@ export default function Perfil() {
     formState: { errors: errorsEditar },
   } = useForm<FormEditarPerfilData>();
 
-  // Form de exclusão (só senha)
   const {
     register: registerExcluir,
     handleSubmit: handleExcluir,
@@ -37,7 +53,6 @@ export default function Perfil() {
     formState: { errors: errorsExcluir },
   } = useForm<{ senha: string }>();
 
-  // Se não tem usuário logado, redireciona para o login
   if (!usuarioLogado) {
     return <Navigate to="/login" replace />;
   }
@@ -47,24 +62,27 @@ export default function Perfil() {
     return <Navigate to="/login" replace />;
   }
 
-  // Missões concluídas do usuário logado (lista resumida)
   const missoesConcluidas = listarMissoesConcluidas(usuarioLogado.id);
 
-  // Abre o modo de edição preenchendo os campos com os dados atuais
   function abrirEdicao() {
     setErroEdicao('');
     resetEditar({
-      nomeUsuario: perfil!.nomeUsuario,
-      nomeCompleto: perfil!.nomeCompleto,
-      email: perfil!.email,
-      senha: usuarioLogado!.senha,
+      nomeUsuario: perfil.nomeUsuario,
+      nomeCompleto: perfil.nomeCompleto,
+      email: perfil.email,
+      senha: '',
     });
     setEditando(true);
   }
 
-  function onSubmitEdicao(data: FormEditarPerfilData) {
+  async function onSubmitEdicao(data: FormEditarPerfilData) {
     setErroEdicao('');
-    const resultado = atualizarPerfil(data.nomeUsuario, data.nomeCompleto, data.email, data.senha);
+    const resultado = await atualizarPerfil(
+      data.nomeUsuario,
+      data.nomeCompleto,
+      data.email,
+      data.senha,
+    );
     if (!resultado.sucesso) {
       setErroEdicao(resultado.mensagem);
       return;
@@ -72,20 +90,18 @@ export default function Perfil() {
     setEditando(false);
   }
 
-  function onSubmitExclusao(data: { senha: string }) {
+  async function onSubmitExclusao(data: { senha: string }) {
     setErroExclusao('');
-    const resultado = removerPerfil(data.senha);
+    const resultado = await removerPerfil(data.senha);
     if (!resultado.sucesso) {
       setErroExclusao(resultado.mensagem);
       return;
     }
-    // Conta removida — redireciona para a Home
     navigate('/');
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
-      {/* Cabeçalho do perfil */}
       <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
         <div className="w-24 h-24 rounded-full bg-aqua-500/10 flex items-center justify-center flex-shrink-0">
           <span className="text-3xl font-bold text-aqua-400">
@@ -99,13 +115,16 @@ export default function Perfil() {
         </div>
         <div className="flex gap-3">
           <Button variante="secundario" onClick={abrirEdicao}>Editar</Button>
-          <Button variante="perigo" onClick={() => { setErroExclusao(''); resetExcluir(); setExcluindo(true); }}>
+          <Button variante="perigo" onClick={() => {
+            setErroExclusao('');
+            resetExcluir();
+            setExcluindo(true);
+          }}>
             Excluir conta
           </Button>
         </div>
       </div>
 
-      {/* Cards de estatísticas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card className="text-center">
           <p className="text-3xl font-bold text-aqua-400">{perfil.pontos}</p>
@@ -113,7 +132,7 @@ export default function Perfil() {
         </Card>
         <Card className="text-center">
           <p className="text-3xl font-bold text-green-500">{perfil.missoesConcluidas}</p>
-          <p className="text-xs text-dark-400 mt-1">Missões concluídas</p>
+          <p className="text-xs text-dark-400 mt-1">Missoes concluidas</p>
         </Card>
         <Card className="text-center">
           <p className="text-3xl font-bold text-yellow-400">{perfil.missoesEmAndamento}</p>
@@ -121,13 +140,14 @@ export default function Perfil() {
         </Card>
         <Card className="text-center">
           <p className="text-3xl font-bold text-neon-400">{perfil.taxaConclusao}%</p>
-          <p className="text-xs text-dark-400 mt-1">Taxa de conclusão</p>
+          <p className="text-xs text-dark-400 mt-1">Taxa de conclusao</p>
         </Card>
       </div>
 
-      {/* Barra de progresso da taxa de conclusão */}
+      {erroMissoes && <p className="mb-4 text-sm text-red-400">{erroMissoes}</p>}
+
       <Card className="mb-8">
-        <h3 className="text-sm font-medium text-dark-200 mb-3">Taxa de conclusão</h3>
+        <h3 className="text-sm font-medium text-dark-200 mb-3">Taxa de conclusao</h3>
         <div className="w-full h-3 rounded-full bg-dark-700 overflow-hidden">
           <div
             className="h-full rounded-full bg-gradient-to-r from-aqua-500 to-neon-400 transition-all duration-500"
@@ -135,22 +155,18 @@ export default function Perfil() {
           />
         </div>
         <p className="text-xs text-dark-400 mt-2">
-          {perfil.taxaConclusao}% das missões iniciadas foram concluídas
+          {perfil.taxaConclusao}% das missoes iniciadas foram concluidas
         </p>
       </Card>
 
-      {/* Últimas missões concluídas */}
       {missoesConcluidas.length > 0 && (
         <Card className="mb-8">
-          <h3 className="text-lg font-semibold text-dark-100 mb-4">Missões concluídas</h3>
+          <h3 className="text-lg font-semibold text-dark-100 mb-4">Missoes concluidas</h3>
           <div className="space-y-3">
             {missoesConcluidas.map((missao) => {
-              const categoria = categorias.find((c) => c.nome === missao.categoria);
+              const categoria = categorias.find((item) => item.nome === missao.categoria);
               return (
-                <div
-                  key={missao.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-dark-800/40 hover:bg-dark-800/60 transition-colors"
-                >
+                <div key={missao.id} className="flex items-center gap-3 p-3 rounded-xl bg-dark-800/40 hover:bg-dark-800/60 transition-colors">
                   <div className={`w-10 h-10 rounded-lg ${categoria?.corFundo} ${categoria?.cor} flex items-center justify-center flex-shrink-0`}>
                     <IconeCategoria nome={categoria?.icone || ''} className="w-5 h-5" />
                   </div>
@@ -168,17 +184,15 @@ export default function Perfil() {
         </Card>
       )}
 
-      {/* Botões de ação */}
       <div className="flex flex-col sm:flex-row gap-4">
         <Link to="/missoes" className="flex-1">
-          <Button variante="primario" className="w-full">Ver missões</Button>
+          <Button variante="primario" className="w-full">Ver missoes</Button>
         </Link>
         <Link to="/ranking" className="flex-1">
           <Button variante="secundario" className="w-full">Ver ranking</Button>
         </Link>
       </div>
 
-      {/* Modal de edição */}
       {editando && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <Card className="max-w-md w-full">
@@ -189,28 +203,11 @@ export default function Perfil() {
               </div>
             )}
             <form onSubmit={handleEditar(onSubmitEdicao)} className="space-y-4">
-              <Input
-                label="Nome de usuário"
-                {...registerEditar('nomeUsuario', { required: 'Obrigatório' })}
-                erro={errorsEditar.nomeUsuario?.message}
-              />
-              <Input
-                label="Nome completo"
-                {...registerEditar('nomeCompleto', { required: 'Obrigatório' })}
-                erro={errorsEditar.nomeCompleto?.message}
-              />
-              <Input
-                label="E-mail"
-                type="email"
-                {...registerEditar('email', { required: 'Obrigatório' })}
-                erro={errorsEditar.email?.message}
-              />
-              <Input
-                label="Senha"
-                type="password"
-                {...registerEditar('senha', { required: 'Obrigatório' })}
-                erro={errorsEditar.senha?.message}
-              />
+              <Input label="Nome de usuario" {...registerEditar('nomeUsuario', { required: 'Obrigatorio' })} erro={errorsEditar.nomeUsuario?.message} />
+              <Input label="Nome completo" {...registerEditar('nomeCompleto', { required: 'Obrigatorio' })} erro={errorsEditar.nomeCompleto?.message} />
+              <Input label="E-mail" type="email" {...registerEditar('email', { required: 'Obrigatorio' })} erro={errorsEditar.email?.message} />
+              <Input label="Nova senha (opcional)" type="password" {...registerEditar('senha')} erro={errorsEditar.senha?.message} />
+              <p className="text-xs text-dark-500">Deixe a nova senha vazia para manter a senha atual.</p>
               <div className="flex gap-3 pt-2">
                 <Button type="submit" variante="primario" className="flex-1">Salvar</Button>
                 <Button type="button" variante="secundario" onClick={() => setEditando(false)}>Cancelar</Button>
@@ -220,13 +217,12 @@ export default function Perfil() {
         </div>
       )}
 
-      {/* Modal de exclusão */}
       {excluindo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <Card className="max-w-md w-full">
             <h2 className="text-xl font-bold text-dark-50 mb-2">Excluir conta</h2>
             <p className="text-sm text-dark-400 mb-4">
-              Tem certeza? Esta ação não pode ser desfeita. Digite sua senha para confirmar.
+              Esta acao nao pode ser desfeita. Digite sua senha para confirmar.
             </p>
             {erroExclusao && (
               <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
@@ -234,12 +230,7 @@ export default function Perfil() {
               </div>
             )}
             <form onSubmit={handleExcluir(onSubmitExclusao)} className="space-y-4">
-              <Input
-                label="Confirme sua senha"
-                type="password"
-                {...registerExcluir('senha', { required: 'A senha é obrigatória' })}
-                erro={errorsExcluir.senha?.message}
-              />
+              <Input label="Confirme sua senha" type="password" {...registerExcluir('senha', { required: 'A senha e obrigatoria' })} erro={errorsExcluir.senha?.message} />
               <div className="flex gap-3 pt-2">
                 <Button type="submit" variante="perigo" className="flex-1">Excluir conta</Button>
                 <Button type="button" variante="secundario" onClick={() => setExcluindo(false)}>Cancelar</Button>

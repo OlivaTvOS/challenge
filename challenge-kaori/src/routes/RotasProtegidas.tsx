@@ -1,22 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAppData } from '../core/AppDataContext';
+import { useAppData } from '../context/useAppData';
 
 export function RotaUsuario() {
-  const { usuarioLogado } = useAppData();
+  const { usuarioLogado, carregandoSessao } = useAppData();
+
+  if (carregandoSessao) {
+    return <div className="py-12 text-center text-dark-400">Verificando sua sessao...</div>;
+  }
+
   return usuarioLogado ? <Outlet /> : <Navigate to="/login" replace />;
-}
-
-export function RotaFuncionario() {
-  const { funcionarioLogado } = useAppData();
-  return funcionarioLogado ? <Outlet /> : <Navigate to="/login-funcionario" replace />;
-}
-
-export function RotaSemFuncionario() {
-  const { funcionarioLogado } = useAppData();
-  return funcionarioLogado ? <Navigate to="/funcionario" replace /> : <Outlet />;
-}
-
-export function RotaSemUsuario() {
-  const { usuarioLogado } = useAppData();
-  return usuarioLogado ? <Navigate to="/perfil" replace /> : <Outlet />;
 }

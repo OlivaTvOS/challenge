@@ -1,33 +1,35 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
-import type { FormLoginData } from '../../types';
-import { useAppData } from '../../core/AppDataContext';
+import type { FormLoginData, Usuario } from '../../types';
+import { useAppData } from '../../context/useAppData';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { apiFetch } from '../../services/api';
 
-// Página de Login — chama login() e mostra erro real se não bater
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAppData();
   const [erroLogin, setErroLogin] = useState('');
+  const { register, handleSubmit, formState: { errors } } = useForm<FormLoginData>();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormLoginData>();
-
-  function onSubmit(data: FormLoginData) {
+  const onSubmit = async (data: FormLoginData) => {
     setErroLogin('');
-    const resultado = login(data.email, data.senha);
-    if (!resultado.sucesso) {
-      setErroLogin(resultado.mensagem);
-      return;
+    try {
+      const usuarioLogado = await apiFetch<Usuario>('/usuarios/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      if (!usuarioLogado) {
+        throw new Error('A API nao retornou os dados da conta.');
+      }
+      login(usuarioLogado);
+      navigate('/perfil');
+    } catch (error: unknown) {
+      setErroLogin(error instanceof Error ? error.message : 'E-mail ou senha incorretos.');
     }
-    navigate('/perfil');
-  }
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
@@ -41,50 +43,24 @@ export default function Login() {
         <h1 className="text-2xl font-bold text-dark-50">Entrar no SoulUp</h1>
         <p className="text-sm text-dark-400 mt-1">Acesse sua conta para continuar</p>
       </div>
-
       <Card>
-        {/* Mensagem de erro do login */}
-        {erroLogin && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
-            {erroLogin}
-          </div>
-        )}
-
+        {erroLogin && <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">{erroLogin}</div>}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <Input
-            label="E-mail"
-            type="email"
-            placeholder="seu@email.com"
-            {...register('email', {
-              required: 'O e-mail é obrigatório',
-              pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: 'Digite um e-mail válido',
-              },
-            })}
-            erro={errors.email?.message}
-          />
-
-          <Input
-            label="Senha"
-            type="password"
-            placeholder="Sua senha"
-            {...register('senha', {
-              required: 'A senha é obrigatória',
-            })}
-            erro={errors.senha?.message}
-          />
-
-          <Button type="submit" variante="primario" className="w-full">
-            Entrar
-          </Button>
+          <Input label="E-mail" type="email" placeholder="seu@email.com" {...register('email', {
+            required: 'O e-mail e obrigatorio',
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: 'Digite um e-mail valido',
+            },
+          })} erro={errors.email?.message} />
+          <Input label="Senha" type="password" placeholder="Sua senha" {...register('senha', {
+            required: 'A senha e obrigatoria',
+          })} erro={errors.senha?.message} />
+          <Button type="submit" variante="primario" className="w-full">Entrar</Button>
         </form>
-
         <p className="text-sm text-dark-400 text-center mt-5">
-          Não tem conta?{' '}
-          <Link to="/cadastro" className="text-aqua-400 hover:text-aqua-300 transition-colors">
-            Criar conta
-          </Link>
+          Nao tem conta?{' '}
+          <Link to="/cadastro" className="text-aqua-400 hover:text-aqua-300 transition-colors">Criar conta</Link>
         </p>
       </Card>
     </div>
