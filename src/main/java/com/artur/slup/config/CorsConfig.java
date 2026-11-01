@@ -1,17 +1,36 @@
 package com.artur.slup.config;
 
+import java.util.Arrays;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+public class CorsConfig {
 
-    public void addCorsMappings(CorsRegistry registry){
+    @Value("${app.cors.allowed-origins:http://localhost:5173}")
+    private String allowedOrigins;
 
-        registry.addMapping("/**") // Libera os Endpoints
-                .allowedOrigins("http://localhost:5173")// Url onde o react tá rodando
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE") // Métodos permitidos
-                .allowedHeaders("*"); // Todos os Headers
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration configuracao = new CorsConfiguration();
+        String[] origens = allowedOrigins.split(",");
+        for (int i = 0; i < origens.length; i++) {
+            origens[i] = origens[i].trim();
+        }
+
+        configuracao.setAllowedOrigins(Arrays.asList(origens));
+        configuracao.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuracao.setAllowedHeaders(Arrays.asList("*"));
+        configuracao.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource origem = new UrlBasedCorsConfigurationSource();
+        origem.registerCorsConfiguration("/**", configuracao);
+        return new CorsFilter(origem);
     }
 }

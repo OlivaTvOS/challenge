@@ -3,6 +3,7 @@ package com.artur.slup.dao;
 import com.artur.slup.dto.Missao;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,31 +14,35 @@ import java.util.List;
 @Repository
 public class MissaoDAO implements IMissaoDAO {
 
-    private final Connection connection;
+    private final DataSource dataSource;
 
-    public MissaoDAO(Connection connection) {
-        this.connection = connection;
+    public MissaoDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
     public boolean criarMissao(Missao missao) {
         String sql = "INSERT INTO MISSAO (ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA) VALUES (?, ?, ?, ?, ?)";
-
-        try (PreparedStatement statement = connection.prepareStatement(sql, new String[] { "ID_MISSAO" })) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql, new String[] { "ID_MISSAO" })) {
             statement.setInt(1, missao.getIdCategoria());
             statement.setString(2, missao.getTitulo());
             statement.setString(3, missao.getDescricao());
             statement.setInt(4, missao.getPontosRecompensa());
             statement.setString(5, missao.getAtiva());
 
-            if (statement.executeUpdate() == 0) return false;
+            if (statement.executeUpdate() == 0) {
+                return false;
+            }
 
-            try (ResultSet keys = statement.getGeneratedKeys()) {
-                if (keys.next()) missao.setIdMissao(keys.getInt(1));
+            try (ResultSet chaves = statement.getGeneratedKeys()) {
+                if (chaves.next()) {
+                    missao.setIdMissao(chaves.getInt(1));
+                }
             }
             return true;
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao cadastrar missão: ", e);
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao cadastrar missao.", erro);
         }
     }
 
@@ -46,7 +51,8 @@ public class MissaoDAO implements IMissaoDAO {
         List<Missao> missoes = new ArrayList<>();
         String sql = "SELECT ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA FROM MISSAO WHERE ATIVA = 'S' ORDER BY ID_MISSAO";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 Missao missao = new Missao();
@@ -58,8 +64,8 @@ public class MissaoDAO implements IMissaoDAO {
                 missao.setAtiva(rs.getString("ATIVA"));
                 missoes.add(missao);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar missões: ", e);
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao listar missoes.", erro);
         }
         return missoes;
     }
@@ -67,12 +73,13 @@ public class MissaoDAO implements IMissaoDAO {
     @Override
     public int contarMissoes() {
         String sql = "SELECT COUNT(*) FROM MISSAO";
-        try (PreparedStatement statement = connection.prepareStatement(sql);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
             rs.next();
             return rs.getInt(1);
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao contar missões: ", e);
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao contar missoes.", erro);
         }
     }
 }
