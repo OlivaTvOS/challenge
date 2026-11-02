@@ -89,9 +89,6 @@ export default function Ranking() {
         ) : erro ? (
           <div className="p-6">
             <p className="text-sm text-red-300">{erro}</p>
-            <button type="button" onClick={() => setFiltro((atual) => atual)} className="mt-3 text-sm underline text-white">
-              Tentar novamente
-            </button>
           </div>
         ) : ranking.length === 0 ? (
           <p className="p-6 text-sm text-dark-200">Ainda não há pontuações para exibir neste ranking.</p>
