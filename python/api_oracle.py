@@ -37,8 +37,6 @@ def consultar_banco(comando_sql):
             registro = {}
             for indice in range(len(nomes_colunas)):
                 valor = linha[indice]
-                if valor is not None and hasattr(valor, "isoformat"):
-                    valor = valor.isoformat()
                 registro[nomes_colunas[indice]] = valor
             registros.append(registro)
 
