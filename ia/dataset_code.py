@@ -110,6 +110,62 @@ def prever_cluster():
     )
 
 
+
+@app.route("/predict/clusters", methods=["POST"])
+def agrupar_usuarios():
+    """Agrupa vários usuários e resume o tamanho de cada grupo."""
+    dados, erro_json = obter_json()
+    if erro_json:
+        return erro_json
+
+    usuarios = dados.get("usuarios")
+    if not isinstance(usuarios, list) or not usuarios:
+        return jsonify({"erro": "Envie uma lista não vazia no campo 'usuarios'."}), 400
+
+    registros = []
+    identificadores = []
+    for indice, usuario in enumerate(usuarios):
+        valores, erro_validacao = validar_dados(usuario, FEATURES_CLUSTER)
+        if erro_validacao:
+            return jsonify(
+                {"erro": f"Usuário na posição {indice}: {erro_validacao}"}
+            ), 400
+        registros.append(valores)
+        identificadores.append(usuario.get("id_usuario", indice + 1))
+
+    dados_usuarios = pd.DataFrame(registros, columns=FEATURES_CLUSTER)
+    dados_escalonados = MODELOS["escalonador_cluster"].transform(dados_usuarios)
+    grupos = MODELOS["modelo_cluster"].predict(dados_escalonados)
+
+    quantidade_grupos = {}
+    usuarios_por_grupo = {}
+    for indice in range(len(grupos)):
+        grupo = int(grupos[indice])
+        quantidade_grupos[grupo] = quantidade_grupos.get(grupo, 0) + 1
+        if grupo not in usuarios_por_grupo:
+            usuarios_por_grupo[grupo] = []
+        usuarios_por_grupo[grupo].append(identificadores[indice])
+
+    resumo = []
+    for grupo, quantidade in quantidade_grupos.items():
+        resumo.append(
+            {
+                "cluster_id": grupo,
+                "perfil_recomendado": MAPA_PERFIS_CLUSTER[grupo],
+                "quantidade_usuarios": quantidade,
+                "usuarios": usuarios_por_grupo[grupo],
+            }
+        )
+
+    return jsonify(
+        {
+            "total_usuarios": len(usuarios),
+            "grupos": resumo,
+            "modelo": "KMeans",
+        }
+    )
+
+
 @app.route("/predict/perfil", methods=["POST"])
 def prever_perfil():
     """Classifica o perfil usando a floresta aleatória treinada."""
