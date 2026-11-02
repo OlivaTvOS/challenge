@@ -37,25 +37,7 @@ INNER JOIN CATEGORIA C
 WHERE UM.STATUS IN ('EM_ANDAMENTO', 'CONCLUIDA')
 ORDER BY UM.DATA_INICIO DESC;
 
--- 3. Publicacoes e interacoes
--- Lista publicacoes nao rejeitadas e suas interacoes, quando existirem.
-SELECT
-    P.ID_PUBLICACAO,
-    U.NOME_USUARIO,
-    P.CONTEUDO,
-    P.STATUS_VERIFICACAO,
-    I.TIPO_INTERACAO,
-    I.CONTEUDO AS TEXTO_INTERACAO,
-    I.DATA_INTERACAO
-FROM PUBLICACAO P
-INNER JOIN USUARIO U
-    ON U.ID_USUARIO = P.ID_USUARIO
-LEFT JOIN INTERACAO I
-    ON I.ID_PUBLICACAO = P.ID_PUBLICACAO
-WHERE P.STATUS_VERIFICACAO <> 'REJEITADA'
-ORDER BY P.DATA_PUBLICACAO DESC, P.ID_PUBLICACAO;
-
--- 4. Estatisticas de missoes por categoria
+-- 3. Estatisticas de missoes por categoria
 -- Demonstra GROUP BY e COUNT, SUM, AVG, MIN e MAX.
 SELECT
     C.NOME AS CATEGORIA,
@@ -71,7 +53,7 @@ LEFT JOIN MISSAO M
 GROUP BY C.ID_CATEGORIA, C.NOME
 ORDER BY QUANTIDADE_MISSOES DESC, C.NOME;
 
--- 5. Perfil comportamental registrado por usuario
+-- 4. Perfil comportamental registrado por usuario
 -- Exibe a categoria atribuida e o nivel de confianca salvo.
 SELECT
     U.NOME_USUARIO,
