@@ -17,7 +17,7 @@ public class InteligenciaArtificialDAO implements IInteligenciaArtificialDAO {
 
     private final DataSource dataSource;
 
-    public IADAO(DataSource dataSource) {
+    public InteligenciaArtificialDAO(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
