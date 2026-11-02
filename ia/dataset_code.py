@@ -18,6 +18,7 @@ if not ARQUIVO_MODELOS.is_file():
 MODELOS = joblib.load(ARQUIVO_MODELOS)
 FEATURES_CLUSTER = MODELOS["features_cluster"]
 FEATURES_PERFIL = MODELOS["features_perfil"]
+FEATURES_REGRESSAO = MODELOS["features_regressao"]
 MAPA_PERFIS_CLUSTER = MODELOS["mapa_perfis_cluster"]
 
 app = Flask(__name__)
@@ -88,7 +89,7 @@ def receber_entrada(campos):
 @app.route("/", methods=["GET"])
 def verificar_api():
     """Informa que a API e os modelos estão disponíveis."""
-    return jsonify({"status": "disponível", "modelos": ["kmeans", "random_forest"]})
+    return jsonify({"status": "disponível", "modelos": ["kmeans", "random_forest", "linear_regression"]})
 
 
 @app.route("/predict/cluster", methods=["POST"])
@@ -128,6 +129,24 @@ def prever_perfil():
             "perfil_previsto": perfil,
             "probabilidades": probabilidades_por_perfil,
             "modelo": "RandomForestClassifier",
+        }
+    )
+
+
+@app.route("/predict/pontos", methods=["POST"])
+def prever_pontos():
+    """Estima a pontuação com base no histórico de missões informado."""
+    dados_usuario, erro = receber_entrada(FEATURES_REGRESSAO)
+    if erro:
+        return erro
+
+    modelo = MODELOS["modelo_regressao"]
+    pontos = float(modelo.predict(dados_usuario)[0])
+    return jsonify(
+        {
+            "pontos_estimados": round(pontos, 2),
+            "modelo": "LinearRegression",
+            "aviso": "Estimativa experimental; não substitui a pontuação oficial do sistema.",
         }
     )
 
