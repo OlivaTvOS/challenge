@@ -1,6 +1,6 @@
 -- Sprint 4 - Carga demonstrativa do SoulUp/Kairos
 -- Executar depois de modelo.sql.
--- Insere cinco registros em cada tabela principal do dominio.
+-- Insere cinco registros nas tabelas de negocio utilizadas pelo projeto.
 -- Os dados sao ficticios e destinados somente a demonstracao academica.
 -- As tabelas SPRING_SESSION e SPRING_SESSION_ATTRIBUTES sao estruturas tecnicas
 -- e nao recebem dados nesta carga.
@@ -30,12 +30,6 @@ DECLARE
     v_missao_3 NUMBER;
     v_missao_4 NUMBER;
     v_missao_5 NUMBER;
-
-    v_publicacao_1 NUMBER;
-    v_publicacao_2 NUMBER;
-    v_publicacao_3 NUMBER;
-    v_publicacao_4 NUMBER;
-    v_publicacao_5 NUMBER;
 
     v_funcionario NUMBER;
 BEGIN
@@ -118,44 +112,7 @@ BEGIN
     INSERT INTO USUARIO_MISSAO (ID_USUARIO_MISSAO, ID_USUARIO, ID_MISSAO, STATUS, PONTOS_RECEBIDOS)
     VALUES (NULL, v_usuario_5, v_missao_5, 'CANCELADA', 0);
 
-    -- 5. PUBLICACAO
-    INSERT INTO PUBLICACAO (ID_PUBLICACAO, ID_USUARIO, CONTEUDO, STATUS_VERIFICACAO)
-    VALUES (NULL, v_usuario_1, 'Separei os reciclaveis da semana e organizei os materiais por tipo.', 'APROVADA')
-    RETURNING ID_PUBLICACAO INTO v_publicacao_1;
-
-    INSERT INTO PUBLICACAO (ID_PUBLICACAO, ID_USUARIO, CONTEUDO, STATUS_VERIFICACAO)
-    VALUES (NULL, v_usuario_2, 'Hoje fiz o trajeto ate o mercado a pe.', 'APROVADA')
-    RETURNING ID_PUBLICACAO INTO v_publicacao_2;
-
-    INSERT INTO PUBLICACAO (ID_PUBLICACAO, ID_USUARIO, CONTEUDO, STATUS_VERIFICACAO)
-    VALUES (NULL, v_usuario_3, 'Compartilhando dicas para planejar compras e evitar desperdicio.', 'PENDENTE')
-    RETURNING ID_PUBLICACAO INTO v_publicacao_3;
-
-    INSERT INTO PUBLICACAO (ID_PUBLICACAO, ID_USUARIO, CONTEUDO, STATUS_VERIFICACAO)
-    VALUES (NULL, v_usuario_4, 'Comecei a acompanhar meu consumo de agua em casa.', 'APROVADA')
-    RETURNING ID_PUBLICACAO INTO v_publicacao_4;
-
-    INSERT INTO PUBLICACAO (ID_PUBLICACAO, ID_USUARIO, CONTEUDO, STATUS_VERIFICACAO)
-    VALUES (NULL, v_usuario_5, 'Procurando iniciativas ambientais para participar no bairro.', 'REJEITADA')
-    RETURNING ID_PUBLICACAO INTO v_publicacao_5;
-
-    -- 6. INTERACAO
-    INSERT INTO INTERACAO (ID_INTERACAO, ID_PUBLICACAO, ID_USUARIO, TIPO_INTERACAO, CONTEUDO)
-    VALUES (NULL, v_publicacao_1, v_usuario_2, 'CURTIDA', NULL);
-
-    INSERT INTO INTERACAO (ID_INTERACAO, ID_PUBLICACAO, ID_USUARIO, TIPO_INTERACAO, CONTEUDO)
-    VALUES (NULL, v_publicacao_1, v_usuario_3, 'COMENTARIO', 'Boa iniciativa!');
-
-    INSERT INTO INTERACAO (ID_INTERACAO, ID_PUBLICACAO, ID_USUARIO, TIPO_INTERACAO, CONTEUDO)
-    VALUES (NULL, v_publicacao_2, v_usuario_4, 'CURTIDA', NULL);
-
-    INSERT INTO INTERACAO (ID_INTERACAO, ID_PUBLICACAO, ID_USUARIO, TIPO_INTERACAO, CONTEUDO)
-    VALUES (NULL, v_publicacao_3, v_usuario_5, 'COMENTARIO', 'Vou testar essa dica.');
-
-    INSERT INTO INTERACAO (ID_INTERACAO, ID_PUBLICACAO, ID_USUARIO, TIPO_INTERACAO, CONTEUDO)
-    VALUES (NULL, v_publicacao_4, v_usuario_1, 'CURTIDA', NULL);
-
-    -- 7. RANKING
+    -- 5. RANKING
     INSERT INTO RANKING (ID_RANKING, ID_USUARIO, PONTOS, NIVEL, POSICAO)
     VALUES (NULL, v_usuario_1, 50, 1, 2);
 
@@ -171,7 +128,7 @@ BEGIN
     INSERT INTO RANKING (ID_RANKING, ID_USUARIO, PONTOS, NIVEL, POSICAO)
     VALUES (NULL, v_usuario_5, 0, 1, 5);
 
-    -- 8. PERFIL_USUARIO
+    -- 6. PERFIL_USUARIO
     INSERT INTO PERFIL_USUARIO (ID_PERFIL, ID_USUARIO, ID_CATEGORIA, NIVEL_CONFIANCA)
     VALUES (NULL, v_usuario_1, v_categoria_1, 0.91);
 
@@ -187,7 +144,7 @@ BEGIN
     INSERT INTO PERFIL_USUARIO (ID_PERFIL, ID_USUARIO, ID_CATEGORIA, NIVEL_CONFIANCA)
     VALUES (NULL, v_usuario_5, v_categoria_5, 0.69);
 
-    -- 9. CREDENCIAIS
+    -- 7. CREDENCIAIS
     SELECT NVL(MAX(ID_FUNCIONARIO), 0) + 1
     INTO v_funcionario
     FROM CREDENCIAIS;
@@ -212,7 +169,7 @@ BEGIN
     VALUES (v_funcionario + 4, 'Elisa', 'Demo', 'admin.demo05@example.invalid', 'demo123', 'ADMIN');
 
     COMMIT;
-    DBMS_OUTPUT.PUT_LINE('Carga demonstrativa concluida: cinco registros por tabela principal.');
+    DBMS_OUTPUT.PUT_LINE('Carga demonstrativa concluida: cinco registros nas tabelas de negocio.');
 EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
