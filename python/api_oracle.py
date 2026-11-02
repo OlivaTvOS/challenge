@@ -75,21 +75,6 @@ def consultar_historico_missoes():
     return consultar_banco(comando_sql)
 
 
-def consultar_publicacoes():
-    """Consulta publicações e suas interações."""
-    comando_sql = """
-        SELECT P.ID_PUBLICACAO, U.NOME_USUARIO, P.CONTEUDO,
-               P.STATUS_VERIFICACAO, I.TIPO_INTERACAO,
-               I.CONTEUDO AS TEXTO_INTERACAO, I.DATA_INTERACAO
-        FROM PUBLICACAO P
-        INNER JOIN USUARIO U ON U.ID_USUARIO = P.ID_USUARIO
-        LEFT JOIN INTERACAO I ON I.ID_PUBLICACAO = P.ID_PUBLICACAO
-        WHERE P.STATUS_VERIFICACAO <> 'REJEITADA'
-        ORDER BY P.DATA_PUBLICACAO DESC, P.ID_PUBLICACAO
-    """
-    return consultar_banco(comando_sql)
-
-
 def consultar_estatisticas_categorias():
     """Consulta quantidade de missões e recompensas por categoria."""
     comando_sql = """
@@ -122,11 +107,10 @@ def consultar_perfil_comportamental():
 
 
 def listar_consultas():
-    """Executa as cinco consultas SQL documentadas para a Sprint 4."""
+    """Executa as quatro consultas SQL documentadas para a Sprint 4."""
     consultas = []
     consultas.append(("Ranking geral", consultar_ranking))
     consultas.append(("Histórico de missões", consultar_historico_missoes))
-    consultas.append(("Publicações e interações", consultar_publicacoes))
     consultas.append(("Estatísticas por categoria", consultar_estatisticas_categorias))
     consultas.append(("Perfil comportamental", consultar_perfil_comportamental))
 
