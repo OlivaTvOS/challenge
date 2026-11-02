@@ -6,6 +6,9 @@ public class ClassificacaoIA {
     private int clusterId;
     private String perfilPrevisto;
     private CaracteristicasIA caracteristicas;
+    private String modelo;
+    private Double confianca;
+    private Double pontosEstimados;
 
     public ClassificacaoIA() {
     }
@@ -16,6 +19,7 @@ public class ClassificacaoIA {
         this.clusterId = clusterId;
         this.perfilPrevisto = perfilPrevisto;
         this.caracteristicas = caracteristicas;
+        this.modelo = "KMEANS";
     }
 
     public int getIdUsuario() { return idUsuario; }
@@ -26,4 +30,10 @@ public class ClassificacaoIA {
     public void setPerfilPrevisto(String perfilPrevisto) { this.perfilPrevisto = perfilPrevisto; }
     public CaracteristicasIA getCaracteristicas() { return caracteristicas; }
     public void setCaracteristicas(CaracteristicasIA caracteristicas) { this.caracteristicas = caracteristicas; }
+    public String getModelo() { return modelo; }
+    public void setModelo(String modelo) { this.modelo = modelo; }
+    public Double getConfianca() { return confianca; }
+    public void setConfianca(Double confianca) { this.confianca = confianca; }
+    public Double getPontosEstimados() { return pontosEstimados; }
+    public void setPontosEstimados(Double pontosEstimados) { this.pontosEstimados = pontosEstimados; }
 }
