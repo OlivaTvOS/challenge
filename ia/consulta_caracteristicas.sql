@@ -1,0 +1,40 @@
+-- Caracteristicas comportamentais para os modelos de IA do SoulUp.
+-- Os IDs seguem o contrato definido em MissaoDataInitializer.java:
+-- 1 RECICLAGEM, 2 MOBILIDADE, 3 AGUA, 4 ENERGIA, 5 NATUREZA, 6 CONSUMO.
+--
+-- São consideradas tentativas as missões EM_ANDAMENTO, CONCLUIDA e CANCELADA.
+-- DISPONIVEL é excluída porque ainda não representa uma tentativa iniciada.
+-- A taxa de conclusão é calculada como concluidas / tentativas.
+--
+-- Usuários sem tentativas são retornados com contagens zero e taxa zero.
+-- Se os IDs das categorias forem diferentes no Oracle utilizado, corrija o
+-- mapeamento antes de usar os dados para inferência.
+
+SELECT
+    U.ID_USUARIO,
+    SUM(CASE WHEN C.ID_CATEGORIA = 1 THEN 1 ELSE 0 END) AS MISSOES_RECICLAGEM,
+    SUM(CASE WHEN C.ID_CATEGORIA = 2 THEN 1 ELSE 0 END) AS MISSOES_MOBILIDADE,
+    SUM(CASE WHEN C.ID_CATEGORIA = 3 THEN 1 ELSE 0 END) AS MISSOES_AGUA,
+    SUM(CASE WHEN C.ID_CATEGORIA = 4 THEN 1 ELSE 0 END) AS MISSOES_ENERGIA,
+    SUM(CASE WHEN C.ID_CATEGORIA = 5 THEN 1 ELSE 0 END) AS MISSOES_NATUREZA,
+    SUM(CASE WHEN C.ID_CATEGORIA = 6 THEN 1 ELSE 0 END) AS MISSOES_CONSUMO,
+    COUNT(UM.ID_USUARIO_MISSAO) AS TOTAL_MISSOES,
+    SUM(CASE WHEN UM.STATUS = 'CONCLUIDA' THEN 1 ELSE 0 END) AS MISSOES_CONCLUIDAS,
+    SUM(CASE WHEN UM.STATUS = 'CANCELADA' THEN 1 ELSE 0 END) AS MISSOES_ABANDONADAS,
+    CASE
+        WHEN COUNT(UM.ID_USUARIO_MISSAO) = 0 THEN 0
+        ELSE
+            SUM(CASE WHEN UM.STATUS = 'CONCLUIDA' THEN 1 ELSE 0 END)
+            / COUNT(UM.ID_USUARIO_MISSAO)
+    END AS TAXA_CONCLUSAO
+FROM USUARIO U
+LEFT JOIN USUARIO_MISSAO UM
+    ON UM.ID_USUARIO = U.ID_USUARIO
+    AND UM.STATUS IN ('EM_ANDAMENTO', 'CONCLUIDA', 'CANCELADA')
+LEFT JOIN MISSAO M
+    ON M.ID_MISSAO = UM.ID_MISSAO
+LEFT JOIN CATEGORIA C
+    ON C.ID_CATEGORIA = M.ID_CATEGORIA
+WHERE U.TIPO_USUARIO = 'USUARIO'
+GROUP BY U.ID_USUARIO
+ORDER BY U.ID_USUARIO;
