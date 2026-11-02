@@ -7,7 +7,10 @@ SoulUp - sustentabilidade e missões
 Explicação
 O programa Python usa a API Java para manter os dados do projeto compartilhados com o sistema web. O menu oferece cadastro e acesso ao perfil e permite consultar, alterar e excluir os dados da conta. Também permite consultar e realizar missões e visualizar o ranking.
 
-As funções organizam os registros recebidos em listas de dicionários, exibem os dados e filtram uma missão pelo identificador informado. As consultas de perfil e missões podem ser exportadas para JSON. O programa também consome a API pública Open-Meteo para consultar temperatura e precipitação, informações úteis para planejar atividades ao ar livre.
+As funções organizam os registros recebidos em listas de dicionários, exibem os dados e filtram uma missão pelo identificador informado. As consultas de perfil e missões podem ser exportadas para JSON. O programa também consome a API pública Open-Meteo para consultar temperatura e precipitação, informações úteis para planejar atividades ao ar livre. A opção de relatórios consulta diretamente o Oracle, usando as cinco consultas SQL da Sprint 4, e permite exportar os resultados para JSON. As operações de cadastro e alteração continuam centralizadas na API Java.
 
 Vídeo de apresentação
 Link do YouTube: inserir após a publicação.
+
+Configuração
+A API Java pode ser definida pela variável SOULUP_API_URL. Os relatórios Oracle utilizam SOULUP_ORACLE_USER, SOULUP_ORACLE_PASSWORD e SOULUP_ORACLE_DSN. As credenciais não ficam armazenadas no código.
