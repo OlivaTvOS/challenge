@@ -2,6 +2,7 @@ import json
 
 import api_java
 import api_externa
+import api_oracle
 
 
 sessao_usuario = None
@@ -220,6 +221,41 @@ def consultar_clima():
         print(erro)
 
 
+
+def consultar_relatorios_oracle():
+    """Consulta os cinco relatórios SQL definidos para a Sprint 4."""
+    try:
+        resultados = api_oracle.listar_consultas()
+    except RuntimeError as erro:
+        print(erro)
+        return
+
+    for titulo, registros in resultados.items():
+        print(f"\n===== {titulo.upper()} =====")
+        if not registros:
+            print("Nenhum registro encontrado.")
+            continue
+
+        for registro in registros:
+            print("------------------------")
+            for campo, valor in registro.items():
+                print(f"{campo.replace('_', ' ').capitalize()}: {valor}")
+
+        print(f"Total de registros: {len(registros)}")
+
+    opcao = input("\nExportar estes relatórios para JSON? (S/N): ").strip().upper()
+    if opcao == "S":
+        nome_arquivo = "relatorios_soulup_oracle.json"
+        try:
+            with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
+                json.dump(resultados, arquivo, ensure_ascii=False, indent=4)
+            print(f"Relatórios exportados para {nome_arquivo}.")
+        except OSError as erro:
+            print(f"Não foi possível salvar o arquivo JSON: {erro}")
+    elif opcao != "N":
+        print("Opção inválida. Os relatórios não foram exportados.")
+
+
 def organizar_missoes(em_andamento, concluidas, catalogo):
     """Separa as missões em andamento, concluídas e ainda disponíveis."""
     disponiveis = []
@@ -262,7 +298,7 @@ def menu_usuario():
         print(
             "0 - Logout\n1 - Ver perfil\n2 - Atualizar perfil\n"
             "3 - Excluir perfil\n4 - Realizar missão\n5 - Ver ranking\n"
-            "6 - Exportar consultas para JSON\n7 - Consultar clima"
+            "6 - Exportar consultas para JSON\n7 - Consultar clima\n8 - Relatórios do banco Oracle"
         )
         opcao = ler_numero("Escolha: ")
         if opcao is None:
@@ -333,6 +369,8 @@ def menu_usuario():
                 exportar_consultas_json()
             case 7:
                 consultar_clima()
+            case 8:
+                consultar_relatorios_oracle()
             case _:
                 print("Opção inexistente.")
 
