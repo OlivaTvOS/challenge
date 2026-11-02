@@ -3,9 +3,7 @@ import Card from '../../components/ui/Card';
 import { useAppData } from '../../context/useAppData';
 import { categorias } from '../../data/categorias';
 import { listarRanking, type EscopoRanking } from '../../services/ranking';
-import type { CategoriaMissao, RankingItem } from '../../types';
-
-type EscopoRanking = 'GLOBAL' | CategoriaMissao;
+import type { RankingItem } from '../../types';
 
 export default function Ranking() {
   const { usuarioLogado } = useAppData();
