@@ -22,25 +22,19 @@ public class UsuarioMissaoDAO implements IUsuarioMissaoDAO {
 
     @Override
     public boolean iniciarMissao(int idUsuario, int idMissao) {
-        String sqlVerificar = "SELECT 1 FROM USUARIO_MISSAO WHERE ID_USUARIO = ? AND ID_MISSAO = ? AND STATUS IN ('EM_ANDAMENTO', 'CONCLUIDA') FETCH FIRST 1 ROWS ONLY";
-        String sqlInserir = "INSERT INTO USUARIO_MISSAO (ID_USUARIO, ID_MISSAO, STATUS) VALUES (?, ?, 'EM_ANDAMENTO')";
+        String sql = "INSERT INTO USUARIO_MISSAO (ID_USUARIO, ID_MISSAO, STATUS) "
+                + "SELECT ?, M.ID_MISSAO, 'EM_ANDAMENTO' FROM MISSAO M "
+                + "WHERE M.ID_MISSAO = ? AND M.ATIVA = 'S' "
+                + "AND NOT EXISTS (SELECT 1 FROM USUARIO_MISSAO UM "
+                + "WHERE UM.ID_USUARIO = ? AND UM.ID_MISSAO = M.ID_MISSAO "
+                + "AND UM.STATUS IN ('EM_ANDAMENTO', 'CONCLUIDA'))";
 
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement verificar = connection.prepareStatement(sqlVerificar)) {
-                verificar.setInt(1, idUsuario);
-                verificar.setInt(2, idMissao);
-                try (ResultSet rs = verificar.executeQuery()) {
-                    if (rs.next()) {
-                        return false;
-                    }
-                }
-            }
-
-            try (PreparedStatement inserir = connection.prepareStatement(sqlInserir)) {
-                inserir.setInt(1, idUsuario);
-                inserir.setInt(2, idMissao);
-                return inserir.executeUpdate() > 0;
-            }
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idUsuario);
+            statement.setInt(2, idMissao);
+            statement.setInt(3, idUsuario);
+            return statement.executeUpdate() > 0;
         } catch (SQLException erro) {
             throw new RuntimeException("Erro ao iniciar a missao.", erro);
         }
