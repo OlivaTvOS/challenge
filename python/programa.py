@@ -248,7 +248,7 @@ def consultar_relatorios_oracle():
         nome_arquivo = "relatorios_soulup_oracle.json"
         try:
             with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
-                json.dump(resultados, arquivo, ensure_ascii=False, indent=4)
+                json.dump(resultados, arquivo, ensure_ascii=False, indent=4, default=str)
             print(f"Relatórios exportados para {nome_arquivo}.")
         except OSError as erro:
             print(f"Não foi possível salvar o arquivo JSON: {erro}")
@@ -298,7 +298,8 @@ def menu_usuario():
         print(
             "0 - Logout\n1 - Ver perfil\n2 - Atualizar perfil\n"
             "3 - Excluir perfil\n4 - Realizar missão\n5 - Ver ranking\n"
-            "6 - Exportar consultas para JSON\n7 - Consultar clima\n8 - Relatórios do banco Oracle"
+            "6 - Exportar consultas para JSON\n7 - Consultar clima\n"
+            "8 - Relatórios do banco Oracle"
         )
         opcao = ler_numero("Escolha: ")
         if opcao is None:
