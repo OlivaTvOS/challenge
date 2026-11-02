@@ -31,7 +31,7 @@ def cadastrar_usuario():
             email,
             senha,
         )
-        if not isinstance(sessao_usuario, dict) or "id" not in sessao_usuario:
+        if sessao_usuario is None or "id" not in sessao_usuario:
             print("A API não retornou os dados da conta criada.")
             sessao_usuario = None
             return
@@ -48,7 +48,7 @@ def entrar_usuario():
     senha = input("Senha: ")
     try:
         sessao_usuario = api_java.entrar_usuario(email, senha)
-        if not isinstance(sessao_usuario, dict) or "id" not in sessao_usuario:
+        if sessao_usuario is None or "id" not in sessao_usuario:
             print("A API não retornou os dados da conta.")
             sessao_usuario = None
             return
@@ -93,7 +93,7 @@ def realizar_missao_usuario():
         else:
             print("Ação inválida.")
             return
-        if not isinstance(resposta, dict) or "message" not in resposta:
+        if resposta is None or "message" not in resposta:
             print("A API Java retornou uma resposta inválida.")
             return
         print(resposta["message"])
@@ -167,7 +167,7 @@ def exportar_consultas_json():
         print(erro)
         return
 
-    if not isinstance(perfil, dict):
+    if perfil is None or "id" not in perfil:
         print("A API Java retornou os dados do perfil em formato inválido.")
         return
 
@@ -220,13 +220,30 @@ def consultar_clima():
         print(erro)
 
 
-def organizar_missoes(em_andamento, concluidas, disponiveis):
-    """Agrupa as listas de missões em uma sequência de dicionários."""
-    return [
-        {"situacao": "Em andamento", "missoes": em_andamento},
-        {"situacao": "Concluídas", "missoes": concluidas},
-        {"situacao": "Disponíveis", "missoes": disponiveis},
-    ]
+def organizar_missoes(em_andamento, concluidas, catalogo):
+    """Separa as missões em andamento, concluídas e ainda disponíveis."""
+    disponiveis = []
+
+    # Uma missão só fica disponível se ainda não estiver em outra situação.
+    for missao in catalogo:
+        encontrada = False
+
+        for missao_andamento in em_andamento:
+            if missao["idMissao"] == missao_andamento["idMissao"]:
+                encontrada = True
+
+        for missao_concluida in concluidas:
+            if missao["idMissao"] == missao_concluida["idMissao"]:
+                encontrada = True
+
+        if not encontrada:
+            disponiveis.append(missao)
+
+    grupos = []
+    grupos.append({"situacao": "Em andamento", "missoes": em_andamento})
+    grupos.append({"situacao": "Concluídas", "missoes": concluidas})
+    grupos.append({"situacao": "Disponíveis", "missoes": disponiveis})
+    return grupos
 
 
 def filtrar_missao_por_id(missoes, id_missao):
@@ -259,7 +276,7 @@ def menu_usuario():
                 # O perfil traz os pontos persistidos após a conclusão das missões.
                 try:
                     perfil = api_java.buscar_perfil(sessao_usuario["id"])
-                    if not isinstance(perfil, dict):
+                    if perfil is None or "id" not in perfil:
                         print("A API Java retornou os dados do perfil em formato inválido.")
                         continue
                     print(
@@ -289,7 +306,7 @@ def menu_usuario():
                         senha,
                     )
                     perfil_atualizado = api_java.buscar_perfil(id_usuario)
-                    if not isinstance(perfil_atualizado, dict):
+                    if perfil_atualizado is None or "id" not in perfil_atualizado:
                         print("A API Java retornou os dados do perfil em formato inválido.")
                         continue
                     sessao_usuario = perfil_atualizado
@@ -301,7 +318,7 @@ def menu_usuario():
                 senha = input("Senha para excluir o perfil: ")
                 try:
                     resposta = api_java.remover_perfil(sessao_usuario["id"], senha)
-                    if not isinstance(resposta, dict) or "message" not in resposta:
+                    if resposta is None or "message" not in resposta:
                         print("A API Java retornou uma resposta inválida.")
                         continue
                     print(resposta["message"])
