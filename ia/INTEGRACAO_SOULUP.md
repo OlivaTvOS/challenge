@@ -46,7 +46,7 @@ O modelo espera seis dimensões:
 
 O arquivo de carga demonstrativa do banco cria cinco categorias com nomes prefixados por "Demo Sprint 4", incluindo Comunidade, e não contém Energia e Natureza. Portanto, não é seguro relacionar as categorias apenas pela posição ou presumir que a carga demonstrativa representa o catálogo definitivo.
 
-Antes de ativar previsões com usuários reais, o catálogo de produção precisa ter um mapeamento explícito e estável para as seis dimensões do modelo. O mapeamento deve usar identificadores de categoria ou códigos estáveis, nunca correspondência parcial de nomes.
+Encontrei o mapeamento estável no `MissaoDataInitializer.java` da branch Java: IDs 1 a 6 correspondem, respectivamente, a Reciclagem, Mobilidade, Água, Energia, Natureza e Consumo. A consulta `ia/consulta_caracteristicas.sql` usa exatamente esses IDs. A carga demonstrativa atual da branch database, porém, ainda cria categorias com nomes prefixados por `Demo Sprint 4` e apenas cinco categorias; ela não deve ser executada junto com a aplicação Java sem ser alinhada a esse contrato. Antes de usar outro schema Oracle, confirme que os IDs e nomes correspondem ao inicializador.
 
 ## 4. Tabela de resultado da IA
 
@@ -85,13 +85,12 @@ A classificação pode ser solicitada sob demanda e o resultado pode ser armazen
 
 ## 7. Etapas antes da ativação
 
-1. Confirmar os seis IDs/códigos reais de categoria no Oracle.
+1. Conferir no Oracle se os IDs 1 a 6 seguem o contrato do inicializador Java.
 2. Confirmar a semântica de `DISPONIVEL`, `EM_ANDAMENTO`, `CONCLUIDA` e `CANCELADA`.
 3. Reunir dados reais suficientes, com uso autorizado, e documentar como os rótulos de referência são definidos.
 4. Reavaliar o treinamento e a validação com dados reais; evitar medir o modelo somente contra rótulos artificiais derivados das mesmas regras que ele tenta aprender.
-5. Criar a tabela de histórico de IA.
-6. Implementar o DAO/serviço Java e a chamada HTTP para Flask.
-7. Testar com usuários de demonstração e verificar indisponibilidade, ausência de histórico e usuários sem dados suficientes.
+5. Implementar o DAO/serviço Java e a chamada HTTP para Flask, usando a tabela de histórico já criada no DDL.
+6. Testar com usuários de demonstração e verificar indisponibilidade, ausência de histórico e usuários sem dados suficientes.
 
 ## 8. Decisão arquitetural
 
