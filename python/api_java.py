@@ -1,9 +1,10 @@
 import json
+import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-API_BASE_URL = "http://localhost:8080"
+API_BASE_URL = os.getenv("SOULUP_API_URL", "http://localhost:8080").rstrip("/")
 
 CATEGORIAS = {
     1: "RECICLAGEM",
