@@ -1,3 +1,5 @@
 .gitignore/
 __pycache__/
 consultas_usuario_*.json
+relatorios_soulup_oracle.json
+.env
