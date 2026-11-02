@@ -52,7 +52,7 @@ Antes de ativar previsões com usuários reais, o catálogo de produção precis
 
 A tabela `PERFIL_USUARIO` atual relaciona um usuário a uma `CATEGORIA` e guarda um nível de confiança. Os rótulos dos modelos (`GUARDIAO_RECICLAGEM`, `MOBILIZADOR_VERDE`, `GUARDIAO_RECURSOS`, `CONSUMO_CONSCIENTE` e `EXPLORADOR_SUSTENTAVEL`) são arquétipos, não IDs das seis categorias ambientais. Gravar esses rótulos diretamente em `PERFIL_USUARIO.ID_CATEGORIA` seria semanticamente incorreto.
 
-Proposta: criar uma tabela separada `IA_CLASSIFICACAO`, com uma linha por execução, contendo:
+O modelo Oracle agora inclui a tabela `IA_CLASSIFICACAO`, com uma linha por execução, contendo:
 
 - identificador da classificação;
 - identificador do usuário (FK para `USUARIO`, com exclusão em cascata);
@@ -63,7 +63,7 @@ Proposta: criar uma tabela separada `IA_CLASSIFICACAO`, com uma linha por execu�
 - data da classificação;
 - seis contagens de missões e taxa de conclusão usadas naquela previsão.
 
-Guardar as características junto ao resultado cria um retrato auditável do que o modelo recebeu. A tabela seria um histórico de resultados, não uma cópia operacional de `USUARIO_MISSAO`. O DDL final só deve ser criado depois de confirmar o catálogo e a regra dos status.
+Guardar as características junto ao resultado cria um retrato auditável do que o modelo recebeu. A tabela seria um histórico de resultados, não uma cópia operacional de `USUARIO_MISSAO`. A tabela foi adicionada ao DDL; a implementação Java de gravação deve aguardar a confirmação do mapeamento das categorias e da regra dos status.
 
 ## 5. Fluxo de integração recomendado
 
@@ -105,3 +105,7 @@ Até a validação com dados reais, a resposta deve ser identificada como experi
 As tabelas `PUBLICACAO` e `INTERACAO` foram removidas do script de criação do modelo, da carga demonstrativa e das consultas da Sprint 4 porque a funcionalidade de postagens não está implementada no produto. As tabelas técnicas `SPRING_SESSION` e `SPRING_SESSION_ATTRIBUTES` foram mantidas por serem estruturas utilizadas pelo Spring Session.
 
 A remoção dos scripts não apaga automaticamente tabelas que já existam em um Oracle previamente criado. A limpeza de um schema existente deve ser feita com backup e validação das dependências antes de executar qualquer `DROP TABLE`.
+
+## 10. Terceiro modelo e agrupamento coletivo
+
+A API Flask agora oferece três modelos: K-Means para agrupamento, Random Forest para classificação e Regressão Linear para estimar pontos. O endpoint `POST /predict/clusters` permite enviar vários usuários na mesma requisição e obter a distribuição por cluster, que atende ao objetivo de analisar grupos em conjunto. O endpoint individual permanece disponível. A Regressão Linear usa a coluna `pontos` do CSV e é experimental; ela não deve substituir a pontuação oficial calculada pelo Java.
