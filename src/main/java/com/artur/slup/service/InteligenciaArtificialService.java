@@ -24,7 +24,7 @@ public class InteligenciaArtificialService {
 
     public InteligenciaArtificialService(
             IInteligenciaArtificialDAO iaDAO,
-            @Value("${soulup.ia.url:http://localhost:5000}") String urlIA,
+            @Value("${soulup.ia.url:${IA_API_URL:http://localhost:5000}}") String urlIA,
             @Value("${soulup.ia.versao:1.0}") String versaoModelo) {
         this.iaDAO = iaDAO;
         this.restClient = RestClient.builder().baseUrl(urlIA).build();
