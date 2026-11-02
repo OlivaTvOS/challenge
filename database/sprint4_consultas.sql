@@ -1,9 +1,9 @@
 -- Sprint 4 - Consultas SQL do SoulUp/Kairos
 -- Executar depois de modelo.sql e sprint4_carga_inicial.sql.
--- Cada consulta tem uma descricao simples do que apresenta.
+-- As consultas usam exclusivamente tabelas e colunas de modelo.sql.
 
 -- 1. Ranking geral de usuarios
--- Exibe a posicao, o nome de usuario e os pontos registrados no ranking.
+-- Exibe posicao, usuario, pontuacao e nivel.
 SELECT
     R.POSICAO,
     U.ID_USUARIO,
@@ -14,10 +14,10 @@ FROM RANKING R
 INNER JOIN USUARIO U
     ON U.ID_USUARIO = R.ID_USUARIO
 WHERE U.TIPO_USUARIO = 'USUARIO'
-ORDER BY R.POSICAO;
+ORDER BY R.POSICAO NULLS LAST, R.PONTOS DESC;
 
 -- 2. Historico de missoes por usuario
--- Mostra as missoes iniciadas ou concluidas e a categoria de cada uma.
+-- Relaciona usuario, missao, categoria, status e pontos recebidos.
 SELECT
     U.NOME_USUARIO,
     M.ID_MISSAO,
@@ -38,7 +38,7 @@ WHERE UM.STATUS IN ('EM_ANDAMENTO', 'CONCLUIDA')
 ORDER BY UM.DATA_INICIO DESC;
 
 -- 3. Publicacoes e interacoes
--- Lista publicacoes e as interacoes recebidas, quando existirem.
+-- Lista publicacoes nao rejeitadas e suas interacoes, quando existirem.
 SELECT
     P.ID_PUBLICACAO,
     U.NOME_USUARIO,
@@ -55,23 +55,24 @@ LEFT JOIN INTERACAO I
 WHERE P.STATUS_VERIFICACAO <> 'REJEITADA'
 ORDER BY P.DATA_PUBLICACAO DESC, P.ID_PUBLICACAO;
 
--- 4. Quantidade de missoes e pontuacao por categoria
--- Apresenta quantidade, soma e media dos pontos de recompensa.
+-- 4. Estatisticas de missoes por categoria
+-- Demonstra GROUP BY e COUNT, SUM, AVG, MIN e MAX.
 SELECT
     C.NOME AS CATEGORIA,
     COUNT(M.ID_MISSAO) AS QUANTIDADE_MISSOES,
     SUM(M.PONTOS_RECOMPENSA) AS SOMA_PONTOS,
-    AVG(M.PONTOS_RECOMPENSA) AS MEDIA_PONTOS
+    AVG(M.PONTOS_RECOMPENSA) AS MEDIA_PONTOS,
+    MIN(M.PONTOS_RECOMPENSA) AS MENOR_RECOMPENSA,
+    MAX(M.PONTOS_RECOMPENSA) AS MAIOR_RECOMPENSA
 FROM CATEGORIA C
 LEFT JOIN MISSAO M
     ON M.ID_CATEGORIA = C.ID_CATEGORIA
     AND M.ATIVA = 'S'
-WHERE C.ID_CATEGORIA BETWEEN 1 AND 6
 GROUP BY C.ID_CATEGORIA, C.NOME
 ORDER BY QUANTIDADE_MISSOES DESC, C.NOME;
 
 -- 5. Perfil comportamental registrado por usuario
--- Exibe a categoria associada ao perfil e o nivel de confianca salvo.
+-- Exibe a categoria atribuida e o nivel de confianca salvo.
 SELECT
     U.NOME_USUARIO,
     C.NOME AS CATEGORIA,
