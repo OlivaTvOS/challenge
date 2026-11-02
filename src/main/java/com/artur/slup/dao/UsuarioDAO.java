@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class UsuarioDAO {
@@ -196,6 +197,45 @@ public class UsuarioDAO {
             }
         } catch (SQLException erro) {
             throw new RuntimeException("Erro ao listar ranking.", erro);
+        }
+        return ranking;
+    }
+
+
+    public List<RankingItem> listarRankingPorCategoria(String categoria) {
+        Map<String, Integer> categorias = Map.of(
+                "RECICLAGEM", 1, "MOBILIDADE", 2, "AGUA", 3,
+                "ENERGIA", 4, "NATUREZA", 5, "CONSUMO", 6);
+        Integer idCategoria = categorias.get(categoria);
+        if (idCategoria == null) {
+            throw new IllegalArgumentException("Categoria de ranking invalida.");
+        }
+
+        List<RankingItem> ranking = new ArrayList<>();
+        String sql = "SELECT POSICAO, ID_USUARIO, NOME_USUARIO, PONTOS FROM ("
+                + " SELECT ROW_NUMBER() OVER (ORDER BY PONTOS DESC, ID_USUARIO) AS POSICAO,"
+                + " ID_USUARIO, NOME_USUARIO, PONTOS FROM ("
+                + " SELECT U.ID_USUARIO, U.NOME_USUARIO,"
+                + " NVL(SUM(CASE WHEN UM.STATUS = 'CONCLUIDA' THEN M.PONTOS_RECOMPENSA ELSE 0 END), 0) AS PONTOS"
+                + " FROM USUARIO U"
+                + " LEFT JOIN USUARIO_MISSAO UM ON UM.ID_USUARIO = U.ID_USUARIO"
+                + " LEFT JOIN MISSAO M ON M.ID_MISSAO = UM.ID_MISSAO AND M.ID_CATEGORIA = ?"
+                + " WHERE U.TIPO_USUARIO = 'USUARIO'"
+                + " GROUP BY U.ID_USUARIO, U.NOME_USUARIO"
+                + " )) ORDER BY POSICAO";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idCategoria);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    ranking.add(new RankingItem(rs.getInt("POSICAO"),
+                            rs.getInt("ID_USUARIO"), rs.getString("NOME_USUARIO"),
+                            rs.getInt("PONTOS")));
+                }
+            }
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao listar ranking por categoria.", erro);
         }
         return ranking;
     }
