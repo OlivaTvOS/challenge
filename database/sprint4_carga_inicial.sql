@@ -18,6 +18,7 @@ DECLARE
     v_categoria_3 NUMBER;
     v_categoria_4 NUMBER;
     v_categoria_5 NUMBER;
+    v_categoria_6 NUMBER;
 
     v_usuario_1 NUMBER;
     v_usuario_2 NUMBER;
@@ -33,26 +34,49 @@ DECLARE
 
     v_funcionario NUMBER;
 BEGIN
-    -- 1. CATEGORIA
-    INSERT INTO CATEGORIA (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (NULL, 'Demo Sprint 4 - Reciclagem', 'Separacao e destinacao correta de residuos.')
-    RETURNING ID_CATEGORIA INTO v_categoria_1;
+    -- 1. CATEGORIAS CANONICAS (IDs alinhados ao Java e a IA)
+    MERGE INTO CATEGORIA destino
+    USING (SELECT 'RECICLAGEM' NOME, 'Acoes de separacao e descarte correto de residuos reciclaveis.' DESCRICAO FROM DUAL) origem
+    ON (destino.NOME = origem.NOME)
+    WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
+    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
 
-    INSERT INTO CATEGORIA (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (NULL, 'Demo Sprint 4 - Mobilidade', 'Deslocamentos com menor impacto ambiental.')
-    RETURNING ID_CATEGORIA INTO v_categoria_2;
+    MERGE INTO CATEGORIA destino
+    USING (SELECT 'MOBILIDADE' NOME, 'Uso de transporte sustentavel como bicicleta e transporte publico.' DESCRICAO FROM DUAL) origem
+    ON (destino.NOME = origem.NOME)
+    WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
+    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
 
-    INSERT INTO CATEGORIA (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (NULL, 'Demo Sprint 4 - Consumo', 'Escolhas de consumo consciente e reducao de desperdicio.')
-    RETURNING ID_CATEGORIA INTO v_categoria_3;
+    MERGE INTO CATEGORIA destino
+    USING (SELECT 'AGUA' NOME, 'Economia e reuso consciente de agua.' DESCRICAO FROM DUAL) origem
+    ON (destino.NOME = origem.NOME)
+    WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
+    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
 
-    INSERT INTO CATEGORIA (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (NULL, 'Demo Sprint 4 - Agua', 'Uso responsavel e economia de agua.')
-    RETURNING ID_CATEGORIA INTO v_categoria_4;
+    MERGE INTO CATEGORIA destino
+    USING (SELECT 'ENERGIA' NOME, 'Reducao do consumo de energia eletrica e uso eficiente.' DESCRICAO FROM DUAL) origem
+    ON (destino.NOME = origem.NOME)
+    WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
+    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
 
-    INSERT INTO CATEGORIA (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (NULL, 'Demo Sprint 4 - Comunidade', 'Acoes coletivas de cuidado com o ambiente.')
-    RETURNING ID_CATEGORIA INTO v_categoria_5;
+    MERGE INTO CATEGORIA destino
+    USING (SELECT 'NATUREZA' NOME, 'Contato, preservacao e plantio de arvores e areas verdes.' DESCRICAO FROM DUAL) origem
+    ON (destino.NOME = origem.NOME)
+    WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
+    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+
+    MERGE INTO CATEGORIA destino
+    USING (SELECT 'CONSUMO' NOME, 'Consumo consciente e reducao de desperdicios.' DESCRICAO FROM DUAL) origem
+    ON (destino.NOME = origem.NOME)
+    WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
+    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+
+    SELECT ID_CATEGORIA INTO v_categoria_1 FROM CATEGORIA WHERE NOME = 'RECICLAGEM';
+    SELECT ID_CATEGORIA INTO v_categoria_2 FROM CATEGORIA WHERE NOME = 'MOBILIDADE';
+    SELECT ID_CATEGORIA INTO v_categoria_3 FROM CATEGORIA WHERE NOME = 'AGUA';
+    SELECT ID_CATEGORIA INTO v_categoria_4 FROM CATEGORIA WHERE NOME = 'ENERGIA';
+    SELECT ID_CATEGORIA INTO v_categoria_5 FROM CATEGORIA WHERE NOME = 'NATUREZA';
+    SELECT ID_CATEGORIA INTO v_categoria_6 FROM CATEGORIA WHERE NOME = 'CONSUMO';
 
     -- 2. USUARIO
     INSERT INTO USUARIO (ID_USUARIO, NOME_USUARIO, NOME, EMAIL, SENHA, PONTOS, TIPO_USUARIO)
@@ -85,11 +109,11 @@ BEGIN
     RETURNING ID_MISSAO INTO v_missao_2;
 
     INSERT INTO MISSAO (ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA)
-    VALUES (NULL, v_categoria_3, 'Demo - Planejar compras', 'Planejar as compras da semana para evitar desperdicio.', 80, 'S')
+    VALUES (NULL, v_categoria_6, 'Demo - Planejar compras', 'Planejar as compras da semana para evitar desperdicio.', 80, 'S')
     RETURNING ID_MISSAO INTO v_missao_3;
 
     INSERT INTO MISSAO (ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA)
-    VALUES (NULL, v_categoria_4, 'Demo - Reduzir banho', 'Reduzir em dois minutos o tempo habitual de banho.', 60, 'S')
+    VALUES (NULL, v_categoria_3, 'Demo - Reduzir banho', 'Reduzir em dois minutos o tempo habitual de banho.', 60, 'S')
     RETURNING ID_MISSAO INTO v_missao_4;
 
     INSERT INTO MISSAO (ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA)
