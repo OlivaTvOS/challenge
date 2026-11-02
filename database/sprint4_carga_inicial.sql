@@ -78,6 +78,12 @@ BEGIN
     SELECT ID_CATEGORIA INTO v_categoria_5 FROM CATEGORIA WHERE NOME = 'NATUREZA';
     SELECT ID_CATEGORIA INTO v_categoria_6 FROM CATEGORIA WHERE NOME = 'CONSUMO';
 
+    IF v_categoria_1 <> 1 OR v_categoria_2 <> 2 OR v_categoria_3 <> 3
+       OR v_categoria_4 <> 4 OR v_categoria_5 <> 5 OR v_categoria_6 <> 6 THEN
+        RAISE_APPLICATION_ERROR(-20002,
+            'IDs de CATEGORIA divergentes. Esperado: RECICLAGEM=1, MOBILIDADE=2, AGUA=3, ENERGIA=4, NATUREZA=5, CONSUMO=6.');
+    END IF;
+
     -- 2. USUARIO
     INSERT INTO USUARIO (ID_USUARIO, NOME_USUARIO, NOME, EMAIL, SENHA, PONTOS, TIPO_USUARIO)
     VALUES (NULL, 'demo_sprint4_01', 'Ana Souza', 'demo.sprint4.01@example.invalid', 'demo123', 50, 'USUARIO')
