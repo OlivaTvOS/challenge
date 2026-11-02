@@ -1,0 +1,29 @@
+package com.artur.slup.dto;
+
+public class ClassificacaoIA {
+
+    private int idUsuario;
+    private int clusterId;
+    private String perfilPrevisto;
+    private CaracteristicasIA caracteristicas;
+
+    public ClassificacaoIA() {
+    }
+
+    public ClassificacaoIA(int idUsuario, int clusterId, String perfilPrevisto,
+                           CaracteristicasIA caracteristicas) {
+        this.idUsuario = idUsuario;
+        this.clusterId = clusterId;
+        this.perfilPrevisto = perfilPrevisto;
+        this.caracteristicas = caracteristicas;
+    }
+
+    public int getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
+    public int getClusterId() { return clusterId; }
+    public void setClusterId(int clusterId) { this.clusterId = clusterId; }
+    public String getPerfilPrevisto() { return perfilPrevisto; }
+    public void setPerfilPrevisto(String perfilPrevisto) { this.perfilPrevisto = perfilPrevisto; }
+    public CaracteristicasIA getCaracteristicas() { return caracteristicas; }
+    public void setCaracteristicas(CaracteristicasIA caracteristicas) { this.caracteristicas = caracteristicas; }
+}
