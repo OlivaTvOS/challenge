@@ -1,29 +1,45 @@
 # Banco de dados - entrega da Sprint 4
 
-## Arquivos
+## Arquivos da entrega
 
-- `modelo.sql`: cria o modelo Oracle e suas restricoes.
-- `sprint4_carga_inicial.sql`: insere os dados demonstrativos do SoulUp.
-- `sprint4_consultas.sql`: contem cinco consultas ligadas ao funcionamento do sistema.
+- `modelo.sql`: cria as tabelas, sequencias, gatilhos e restricoes do modelo Oracle utilizado pelo projeto.
+- `sprint4_carga_inicial.sql`: insere dados ficticios de demonstracao nas nove tabelas principais do dominio.
+- `sprint4_consultas.sql`: apresenta cinco consultas SQL relacionadas ao funcionamento do SoulUp/Kairos.
 
 ## Ordem de execucao
 
-1. Execute `modelo.sql` no schema Oracle da equipe.
-2. Execute `sprint4_carga_inicial.sql`.
-3. Execute cada consulta de `sprint4_consultas.sql` e confira os resultados.
+1. Execute `modelo.sql` no schema Oracle da equipe, caso o modelo ainda nao tenha sido criado.
+2. Execute `sprint4_carga_inicial.sql` uma unica vez para inserir os registros demonstrativos.
+3. Execute individualmente as cinco consultas de `sprint4_consultas.sql` e confira os resultados.
 
-Os scripts da Sprint 4 foram escritos com os nomes reais das tabelas e colunas definidos em `modelo.sql`. A carga preenche as nove tabelas de negocio do modelo: CATEGORIA, CREDENCIAIS, INTERACAO, MISSAO, PERFIL_USUARIO, PUBLICACAO, RANKING, USUARIO e USUARIO_MISSAO. As tabelas SPRING_SESSION e SPRING_SESSION_ATTRIBUTES sao estruturas tecnicas do Spring Session e nao tabelas principais do dominio.
+A carga utiliza os nomes de tabelas e colunas definidos em `modelo.sql`, respeitando as chaves estrangeiras. Os identificadores das tabelas que possuem sequencia e gatilho sao gerados pelo proprio modelo. A tabela `CREDENCIAIS`, que possui identificador limitado a 200, recebe cinco identificadores livres a partir do maior valor ja cadastrado.
 
-A carga contem registros demonstrativos, criados para testar as relacoes e as consultas. Os usuarios nao sao pessoas reais. As contas de usuario usam a senha de demonstracao `demo123`; troque-a antes de qualquer uso fora do ambiente academico.
+A carga inclui cinco registros em cada uma das nove tabelas de negocio: `CATEGORIA`, `CREDENCIAIS`, `INTERACAO`, `MISSAO`, `PERFIL_USUARIO`, `PUBLICACAO`, `RANKING`, `USUARIO` e `USUARIO_MISSAO`. As tabelas `SPRING_SESSION` e `SPRING_SESSION_ATTRIBUTES` sao estruturas tecnicas do Spring Session e, por isso, nao recebem dados artificiais nesta carga.
 
-## Finalidade das consultas
+## Sobre os dados demonstrativos
 
-1. **Ranking geral:** consulta posicao e pontuacao de cada usuario.
-2. **Historico de missoes:** relaciona usuario, missao, categoria, status e pontos recebidos.
-3. **Publicacoes e interacoes:** mostra conteudos publicados e as curtidas/comentarios associados.
-4. **Estatisticas por categoria:** usa JOIN, GROUP BY, COUNT, SUM e AVG para resumir o catalogo.
-5. **Perfis registrados:** consulta a categoria e o nivel de confianca guardados para cada usuario.
+Os registros foram criados para demonstrar os relacionamentos e permitir a execucao das consultas. Os nomes e as atividades sao ficticios; nao representam usuarios reais nem metricas reais de uso da SoulUp. Os e-mails utilizam o dominio reservado `.invalid`.
+
+A senha `demo123` e usada somente como valor demonstrativo nos registros de usuario e credenciais. Nao reutilize essas contas em ambientes reais.
+
+**Atencao:** a carga nao e um script de atualizacao nem de limpeza. Execute-a uma unica vez no schema preparado. Uma nova execucao pode gerar duplicidades ou esgotar os identificadores disponiveis em `CREDENCIAIS`. Para repetir o teste, restaure um schema limpo ou remova previamente os registros demonstrativos respeitando a ordem das chaves estrangeiras.
+
+## O que cada consulta demonstra
+
+1. **Ranking geral:** relaciona ranking e usuario para exibir posicao, pontuacao e nivel.
+2. **Historico de missoes:** utiliza relacionamentos entre usuario, missao e categoria para mostrar status, datas e pontos recebidos.
+3. **Publicacoes e interacoes:** relaciona publicacoes, autores e interacoes, preservando publicacoes sem interacoes por meio de `LEFT JOIN`.
+4. **Estatisticas por categoria:** agrupa as missoes por categoria e utiliza `COUNT`, `SUM`, `AVG`, `MIN` e `MAX` para resumir quantidade e recompensas.
+5. **Perfil comportamental:** relaciona usuario, categoria e perfil para exibir a classificacao registrada e seu nivel de confianca.
+
+As consultas utilizam `JOIN`, filtros com `WHERE`, ordenacao e agrupamento conforme a necessidade de cada resultado.
 
 ## Evidencias que ainda precisam ser produzidas
 
-Depois de executar os scripts no Oracle, salve capturas de tela da execucao dos INSERTs e do resultado de cada consulta. Inclua essas imagens e a identificacao completa da equipe no PDF final. O codigo SQL, sozinho, nao comprova que a execucao ocorreu no banco.
+Depois de executar os scripts no Oracle, salve capturas de tela que mostrem:
+
+- a execucao bem-sucedida da carga inicial;
+- o resultado de cada uma das cinco consultas;
+- a identificacao do schema utilizado, sem expor senha ou outros dados de acesso.
+
+Inclua as capturas no PDF final da entrega. Os arquivos SQL documentam o que deve ser executado, mas nao comprovam, sozinhos, que a execucao ocorreu no banco.
