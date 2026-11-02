@@ -3,7 +3,7 @@
 ## Arquivos da entrega
 
 - `modelo.sql`: cria as tabelas, sequencias, gatilhos e restricoes do modelo Oracle utilizado pelo projeto.
-- `sprint4_carga_inicial.sql`: insere dados ficticios de demonstracao nas sete tabelas principais do dominio.
+- `sprint4_carga_inicial.sql`: insere dados ficticios de demonstracao nas sete tabelas principais do dominio, alem da tabela de historico `IA_CLASSIFICACAO`.
 - `sprint4_consultas.sql`: apresenta quatro consultas SQL relacionadas ao funcionamento do SoulUp/Kairos.
 
 ## Ordem de execucao
@@ -46,3 +46,11 @@ Inclua as capturas no PDF final da entrega. Os arquivos SQL documentam o que dev
 ## Escopo do modelo
 
 As funcionalidades de publicações e interações não fazem parte do escopo funcional atual do SoulUp. Por isso, `PUBLICACAO` e `INTERACAO` foram removidas do modelo SQL e da carga demonstrativa. As tabelas técnicas `SPRING_SESSION` e `SPRING_SESSION_ATTRIBUTES` permanecem por serem utilizadas pelo Spring Session.
+
+## Histórico de classificações da IA
+
+O modelo também cria `IA_CLASSIFICACAO`, tabela de histórico vinculada a `USUARIO`. Ela guarda o modelo utilizado, perfil previsto quando aplicável, cluster, confiança quando aplicável, estimativa de pontos quando aplicável, versão do modelo e as características numéricas enviadas à inferência. Não é uma cópia do histórico de missões: registra somente o retrato usado em cada classificação. A aplicação Java deverá inserir os resultados após a integração com o serviço Flask.
+
+## Tabelas removidas
+
+`PUBLICACAO` e `INTERACAO` foram retiradas do modelo, da carga e das consultas porque a funcionalidade de postagens não existe no produto atual. Em schemas Oracle já criados, a alteração do arquivo `modelo.sql` não remove automaticamente as tabelas antigas; qualquer exclusão física deve ser planejada separadamente, após backup e conferência de dependências.
