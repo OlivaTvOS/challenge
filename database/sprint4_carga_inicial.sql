@@ -19,6 +19,7 @@ DECLARE
     v_categoria_4 NUMBER;
     v_categoria_5 NUMBER;
     v_categoria_6 NUMBER;
+    v_categoria_6 NUMBER;
 
     v_usuario_1 NUMBER;
     v_usuario_2 NUMBER;
@@ -34,42 +35,48 @@ DECLARE
 
     v_funcionario NUMBER;
 BEGIN
-    -- 1. CATEGORIAS CANONICAS (IDs alinhados ao Java e a IA)
+    -- 1. CATEGORIA
     MERGE INTO CATEGORIA destino
-    USING (SELECT 'RECICLAGEM' NOME, 'Acoes de separacao e descarte correto de residuos reciclaveis.' DESCRICAO FROM DUAL) origem
-    ON (destino.NOME = origem.NOME)
+    USING (SELECT 1 ID_CATEGORIA, 'RECICLAGEM' NOME, 'Acoes de separacao e descarte correto de residuos reciclaveis.' DESCRICAO FROM DUAL) origem
+    ON (destino.ID_CATEGORIA = origem.ID_CATEGORIA)
+    WHEN MATCHED THEN UPDATE SET destino.NOME = origem.NOME, destino.DESCRICAO = origem.DESCRICAO
     WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+    VALUES (origem.ID_CATEGORIA, origem.NOME, origem.DESCRICAO);
 
     MERGE INTO CATEGORIA destino
-    USING (SELECT 'MOBILIDADE' NOME, 'Uso de transporte sustentavel como bicicleta e transporte publico.' DESCRICAO FROM DUAL) origem
-    ON (destino.NOME = origem.NOME)
+    USING (SELECT 2 ID_CATEGORIA, 'MOBILIDADE' NOME, 'Uso de transporte sustentavel como bicicleta e transporte publico.' DESCRICAO FROM DUAL) origem
+    ON (destino.ID_CATEGORIA = origem.ID_CATEGORIA)
+    WHEN MATCHED THEN UPDATE SET destino.NOME = origem.NOME, destino.DESCRICAO = origem.DESCRICAO
     WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+    VALUES (origem.ID_CATEGORIA, origem.NOME, origem.DESCRICAO);
 
     MERGE INTO CATEGORIA destino
-    USING (SELECT 'AGUA' NOME, 'Economia e reuso consciente de agua.' DESCRICAO FROM DUAL) origem
-    ON (destino.NOME = origem.NOME)
+    USING (SELECT 3 ID_CATEGORIA, 'AGUA' NOME, 'Economia e reuso consciente de agua.' DESCRICAO FROM DUAL) origem
+    ON (destino.ID_CATEGORIA = origem.ID_CATEGORIA)
+    WHEN MATCHED THEN UPDATE SET destino.NOME = origem.NOME, destino.DESCRICAO = origem.DESCRICAO
     WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+    VALUES (origem.ID_CATEGORIA, origem.NOME, origem.DESCRICAO);
 
     MERGE INTO CATEGORIA destino
-    USING (SELECT 'ENERGIA' NOME, 'Reducao do consumo de energia eletrica e uso eficiente.' DESCRICAO FROM DUAL) origem
-    ON (destino.NOME = origem.NOME)
+    USING (SELECT 4 ID_CATEGORIA, 'ENERGIA' NOME, 'Reducao do consumo de energia eletrica e uso eficiente.' DESCRICAO FROM DUAL) origem
+    ON (destino.ID_CATEGORIA = origem.ID_CATEGORIA)
+    WHEN MATCHED THEN UPDATE SET destino.NOME = origem.NOME, destino.DESCRICAO = origem.DESCRICAO
     WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+    VALUES (origem.ID_CATEGORIA, origem.NOME, origem.DESCRICAO);
 
     MERGE INTO CATEGORIA destino
-    USING (SELECT 'NATUREZA' NOME, 'Contato, preservacao e plantio de arvores e areas verdes.' DESCRICAO FROM DUAL) origem
-    ON (destino.NOME = origem.NOME)
+    USING (SELECT 5 ID_CATEGORIA, 'NATUREZA' NOME, 'Contato, preservacao e plantio de arvores e areas verdes.' DESCRICAO FROM DUAL) origem
+    ON (destino.ID_CATEGORIA = origem.ID_CATEGORIA)
+    WHEN MATCHED THEN UPDATE SET destino.NOME = origem.NOME, destino.DESCRICAO = origem.DESCRICAO
     WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+    VALUES (origem.ID_CATEGORIA, origem.NOME, origem.DESCRICAO);
 
     MERGE INTO CATEGORIA destino
-    USING (SELECT 'CONSUMO' NOME, 'Consumo consciente e reducao de desperdicios.' DESCRICAO FROM DUAL) origem
-    ON (destino.NOME = origem.NOME)
+    USING (SELECT 6 ID_CATEGORIA, 'CONSUMO' NOME, 'Consumo consciente e reducao de desperdicios.' DESCRICAO FROM DUAL) origem
+    ON (destino.ID_CATEGORIA = origem.ID_CATEGORIA)
+    WHEN MATCHED THEN UPDATE SET destino.NOME = origem.NOME, destino.DESCRICAO = origem.DESCRICAO
     WHEN NOT MATCHED THEN INSERT (ID_CATEGORIA, NOME, DESCRICAO)
-    VALUES (CATEGORIA_ID_CATEGORIA_SEQ.NEXTVAL, origem.NOME, origem.DESCRICAO);
+    VALUES (origem.ID_CATEGORIA, origem.NOME, origem.DESCRICAO);
 
     SELECT ID_CATEGORIA INTO v_categoria_1 FROM CATEGORIA WHERE NOME = 'RECICLAGEM';
     SELECT ID_CATEGORIA INTO v_categoria_2 FROM CATEGORIA WHERE NOME = 'MOBILIDADE';
@@ -77,12 +84,6 @@ BEGIN
     SELECT ID_CATEGORIA INTO v_categoria_4 FROM CATEGORIA WHERE NOME = 'ENERGIA';
     SELECT ID_CATEGORIA INTO v_categoria_5 FROM CATEGORIA WHERE NOME = 'NATUREZA';
     SELECT ID_CATEGORIA INTO v_categoria_6 FROM CATEGORIA WHERE NOME = 'CONSUMO';
-
-    IF v_categoria_1 <> 1 OR v_categoria_2 <> 2 OR v_categoria_3 <> 3
-       OR v_categoria_4 <> 4 OR v_categoria_5 <> 5 OR v_categoria_6 <> 6 THEN
-        RAISE_APPLICATION_ERROR(-20002,
-            'IDs de CATEGORIA divergentes. Esperado: RECICLAGEM=1, MOBILIDADE=2, AGUA=3, ENERGIA=4, NATUREZA=5, CONSUMO=6.');
-    END IF;
 
     -- 2. USUARIO
     INSERT INTO USUARIO (ID_USUARIO, NOME_USUARIO, NOME, EMAIL, SENHA, PONTOS, TIPO_USUARIO)
@@ -123,7 +124,7 @@ BEGIN
     RETURNING ID_MISSAO INTO v_missao_4;
 
     INSERT INTO MISSAO (ID_MISSAO, ID_CATEGORIA, TITULO, DESCRICAO, PONTOS_RECOMPENSA, ATIVA)
-    VALUES (NULL, v_categoria_5, 'Demo - Acao comunitaria', 'Participar de atividade local de limpeza ou plantio.', 120, 'S')
+    VALUES (NULL, v_categoria_5, 'Demo - Plantar uma muda', 'Participar de atividade local de plantio e preservacao ambiental.', 120, 'S')
     RETURNING ID_MISSAO INTO v_missao_5;
 
     -- 4. USUARIO_MISSAO
