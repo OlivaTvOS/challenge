@@ -49,7 +49,7 @@ Na pasta `python`:
 python programa.py
 ```
 
-Depois de entrar com um usuário, selecione **8 - Relatórios do banco Oracle**. A opção executa as cinco consultas SQL documentadas em `database/sprint4_consultas.sql` e permite exportar os resultados para JSON.
+Depois de entrar com um usuário, selecione **8 - Relatórios do banco Oracle**. A opção executa as quatro consultas SQL documentadas em `database/sprint4_consultas.sql` e permite exportar os resultados para JSON.
 
 Se as variáveis Oracle não estiverem configuradas ou o banco estiver indisponível, o programa informa o problema sem encerrar a sessão.
 
