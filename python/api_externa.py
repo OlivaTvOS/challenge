@@ -33,12 +33,16 @@ def consultar_clima(latitude, longitude):
             "A API pública retornou uma resposta inválida."
         ) from erro
 
-    if not isinstance(dados, dict) or not isinstance(dados.get("current"), dict):
+    if dados is None or "current" not in dados:
         raise RuntimeError(
             "A API pública não retornou os dados atuais do clima."
         )
 
     clima_atual = dados["current"]
+    if clima_atual is None:
+        raise RuntimeError(
+            "A API pública não retornou os dados atuais do clima."
+        )
     if "temperature_2m" not in clima_atual or "precipitation" not in clima_atual:
         raise RuntimeError(
             "A API pública não retornou os dados atuais do clima."
