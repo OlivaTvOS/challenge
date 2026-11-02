@@ -31,7 +31,7 @@ def fazer_requisicao(caminho, metodo="GET", dados=None):
 
     resposta = None
     try:
-        resposta = urlopen(requisicao)
+        resposta = urlopen(requisicao, timeout=15)
         conteudo = resposta.read().decode("utf-8").strip()
     except HTTPError as erro:
         mensagem = erro.read().decode("utf-8").strip()
