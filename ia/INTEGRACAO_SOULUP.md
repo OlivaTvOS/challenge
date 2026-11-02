@@ -98,3 +98,10 @@ A classificação pode ser solicitada sob demanda e o resultado pode ser armazen
 A recomendação é manter Java como orquestrador e proprietário dos dados, Flask como serviço de inferência e Oracle como fonte de verdade. Não duplicar `USUARIO_MISSAO` em outra tabela de eventos. Criar apenas uma tabela de histórico de classificações quando as regras de dados e categorias estiverem confirmadas.
 
 Até a validação com dados reais, a resposta deve ser identificada como experimental e não usada para decisões relevantes sobre usuários.
+
+
+## 9. Escopo de postagens
+
+As tabelas `PUBLICACAO` e `INTERACAO` foram removidas do script de criação do modelo, da carga demonstrativa e das consultas da Sprint 4 porque a funcionalidade de postagens não está implementada no produto. As tabelas técnicas `SPRING_SESSION` e `SPRING_SESSION_ATTRIBUTES` foram mantidas por serem estruturas utilizadas pelo Spring Session.
+
+A remoção dos scripts não apaga automaticamente tabelas que já existam em um Oracle previamente criado. A limpeza de um schema existente deve ser feita com backup e validação das dependências antes de executar qualquer `DROP TABLE`.
