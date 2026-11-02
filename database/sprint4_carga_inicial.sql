@@ -1,11 +1,12 @@
 -- Sprint 4 - Carga demonstrativa do SoulUp/Kairos
 -- Executar depois de modelo.sql.
--- Insere cinco registros nas tabelas de negocio utilizadas pelo projeto.
+-- Insere cinco usuarios demonstrativos e utiliza as seis categorias oficiais.
 -- Os dados sao ficticios e destinados somente a demonstracao academica.
 -- As tabelas SPRING_SESSION e SPRING_SESSION_ATTRIBUTES sao estruturas tecnicas
 -- e nao recebem dados nesta carga.
 --
--- A carga utiliza as sequences e triggers do modelo para gerar as chaves.
+-- IDs das categorias sao fixos para manter compatibilidade com Java e IA.
+-- As demais chaves sao geradas pelas sequences e triggers do modelo.
 -- Pode ser executada em schema que ja possua dados de usuarios, categorias e missoes:
 -- os registros de demonstracao usam identificadores naturais exclusivos.
 -- Execute uma unica vez para evitar duplicar os registros demonstrativos.
@@ -18,7 +19,6 @@ DECLARE
     v_categoria_3 NUMBER;
     v_categoria_4 NUMBER;
     v_categoria_5 NUMBER;
-    v_categoria_6 NUMBER;
     v_categoria_6 NUMBER;
 
     v_usuario_1 NUMBER;
