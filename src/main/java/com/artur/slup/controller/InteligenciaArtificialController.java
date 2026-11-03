@@ -18,6 +18,11 @@ public class InteligenciaArtificialController {
         this.inteligenciaArtificialService = inteligenciaArtificialService;
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> verificarIntegracao() {
+        return ResponseEntity.ok(inteligenciaArtificialService.verificarIntegracao());
+    }
+
     @PostMapping("/modelos")
     public ResponseEntity<?> executarModelosIndividuais() {
         try {
