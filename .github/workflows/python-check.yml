@@ -1,0 +1,30 @@
+name: Python check
+
+on:
+  push:
+    branches: [python]
+    paths:
+      - 'python/**'
+      - '.github/workflows/python-check.yml'
+  pull_request:
+    branches: [python]
+    paths:
+      - 'python/**'
+      - '.github/workflows/python-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r python/requirements.txt
+      - name: Compile Python modules
+        run: python -m compileall -q python
+      - name: Check module imports
+        run: PYTHONPATH=python python -c "import api_java, api_externa, api_oracle, programa"
