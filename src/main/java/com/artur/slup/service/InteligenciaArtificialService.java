@@ -31,6 +31,31 @@ public class InteligenciaArtificialService {
         this.versaoModelo = versaoModelo;
     }
 
+    public Map<String, Object> verificarIntegracao() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("api_ia_configurada", true);
+
+        try {
+            Map<?, ?> resposta = restClient.get().uri("/").retrieve().body(Map.class);
+            status.put("api_ia_disponivel", resposta != null);
+            status.put("modelos_carregados", resposta != null
+                    && Boolean.TRUE.equals(resposta.get("modelos_carregados")));
+            status.put("modelos", resposta == null ? Map.of() : resposta);
+        } catch (RuntimeException erro) {
+            status.put("api_ia_disponivel", false);
+            status.put("erro_api_ia", "Nao foi possivel consultar a API de IA.");
+        }
+
+        try {
+            status.put("tabela_historico_disponivel", iaDAO.verificarTabelaHistorico());
+        } catch (RuntimeException erro) {
+            status.put("tabela_historico_disponivel", false);
+            status.put("erro_banco", "Nao foi possivel verificar a tabela de historico.");
+        }
+
+        return status;
+    }
+
     public ResultadoAgrupamentoIA agruparUsuarios() {
         List<CaracteristicasIA> usuarios = iaDAO.listarCaracteristicasUsuarios();
         if (usuarios.isEmpty()) {
