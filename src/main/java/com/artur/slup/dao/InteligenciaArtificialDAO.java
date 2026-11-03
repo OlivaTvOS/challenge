@@ -64,6 +64,18 @@ public class InteligenciaArtificialDAO implements IInteligenciaArtificialDAO {
     }
 
     @Override
+    public boolean verificarTabelaHistorico() {
+        String sql = "SELECT COUNT(*) FROM USER_TABLES WHERE TABLE_NAME = 'IA_CLASSIFICACAO'";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao verificar a tabela de historico da IA.", erro);
+        }
+    }
+
+    @Override
     public void salvarClassificacoes(List<ClassificacaoIA> classificacoes, String versaoModelo) {
         salvarResultados(classificacoes, "KMEANS", versaoModelo);
     }
