@@ -4,7 +4,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-API_BASE_URL = os.getenv("SOULUP_API_URL", "http://localhost:8080").rstrip("/")
+API_BASE_URL = os.getenv("SOULUP_API_URL", "https://soulup-java-api.onrender.com/").rstrip("/")
 
 # A API Java no Render Free pode levar cerca de um minuto para iniciar.
 # Rotas de IA tambem podem aguardar a inicializacao da API Flask, em sequencia.
