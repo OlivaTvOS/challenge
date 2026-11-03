@@ -9,4 +9,5 @@ public interface IInteligenciaArtificialDAO {
     List<CaracteristicasIA> listarCaracteristicasUsuarios();
     void salvarClassificacoes(List<ClassificacaoIA> classificacoes, String versaoModelo);
     void salvarResultados(List<ClassificacaoIA> resultados, String modelo, String versaoModelo);
+    boolean verificarTabelaHistorico();
 }
