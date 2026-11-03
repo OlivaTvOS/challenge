@@ -6,6 +6,10 @@ from urllib.request import Request, urlopen
 
 API_BASE_URL = os.getenv("SOULUP_API_URL", "http://localhost:8080").rstrip("/")
 
+# A API publicada no Render Free pode levar cerca de um minuto para voltar
+# apos um periodo sem requisicoes. O timeout precisa comportar esse cold start.
+API_TIMEOUT = 75
+
 CATEGORIAS = {
     1: "RECICLAGEM",
     2: "MOBILIDADE",
@@ -31,7 +35,7 @@ def fazer_requisicao(caminho, metodo="GET", dados=None):
 
     resposta = None
     try:
-        resposta = urlopen(requisicao, timeout=15)
+        resposta = urlopen(requisicao, timeout=API_TIMEOUT)
         conteudo = resposta.read().decode("utf-8").strip()
     except HTTPError as erro:
         mensagem = erro.read().decode("utf-8").strip()
