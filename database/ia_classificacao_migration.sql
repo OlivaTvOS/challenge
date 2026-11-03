@@ -61,6 +61,28 @@ EXCEPTION
 END;
 /
 
+DECLARE
+    v_maior_id NUMBER;
+    v_proximo_id NUMBER;
+BEGIN
+    SELECT NVL(MAX(ID_CLASSIFICACAO), 0)
+    INTO v_maior_id
+    FROM IA_CLASSIFICACAO;
+
+    LOOP
+        SELECT IA_CLASSIFICACAO_ID_SEQ.NEXTVAL
+        INTO v_proximo_id
+        FROM DUAL;
+
+        EXIT WHEN v_proximo_id > v_maior_id;
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE(
+        'Sequence sincronizada. Proximo ID disponivel: ' || (v_proximo_id + 1)
+    );
+END;
+/
+
 BEGIN
     EXECUTE IMMEDIATE
         'CREATE INDEX IX_IA_CLASSIFICACAO_USUARIO
