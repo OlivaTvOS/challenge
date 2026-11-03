@@ -37,9 +37,11 @@ public class InteligenciaArtificialService {
 
         try {
             Map<?, ?> resposta = restClient.get().uri("/").retrieve().body(Map.class);
-            status.put("api_ia_disponivel", resposta != null);
+            status.put("api_ia_disponivel", resposta != null
+                    && "disponível".equals(resposta.get("status")));
             status.put("modelos_carregados", resposta != null
-                    && Boolean.TRUE.equals(resposta.get("modelos_carregados")));
+                    && resposta.get("modelos") instanceof List<?> modelos
+                    && !modelos.isEmpty());
             status.put("modelos", resposta == null ? Map.of() : resposta);
         } catch (RuntimeException erro) {
             status.put("api_ia_disponivel", false);
