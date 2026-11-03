@@ -6,9 +6,10 @@ from urllib.request import Request, urlopen
 
 API_BASE_URL = os.getenv("SOULUP_API_URL", "http://localhost:8080").rstrip("/")
 
-# A API publicada no Render Free pode levar cerca de um minuto para voltar
-# apos um periodo sem requisicoes. O timeout precisa comportar esse cold start.
-API_TIMEOUT = 75
+# A API Java no Render Free pode levar cerca de um minuto para iniciar.
+# Rotas de IA tambem podem aguardar a inicializacao da API Flask, em sequencia.
+# O timeout de 150 segundos comporta os dois cold starts sem repetir a requisicao.
+API_TIMEOUT = 150
 
 CATEGORIAS = {
     1: "RECICLAGEM",
