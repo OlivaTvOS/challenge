@@ -64,21 +64,31 @@ END;
 DECLARE
     v_maior_id NUMBER;
     v_proximo_id NUMBER;
+    v_incremento NUMBER;
 BEGIN
     SELECT NVL(MAX(ID_CLASSIFICACAO), 0)
     INTO v_maior_id
     FROM IA_CLASSIFICACAO;
 
-    LOOP
+    SELECT IA_CLASSIFICACAO_ID_SEQ.NEXTVAL
+    INTO v_proximo_id
+    FROM DUAL;
+
+    IF v_proximo_id <= v_maior_id THEN
+        v_incremento := v_maior_id - v_proximo_id + 1;
+        EXECUTE IMMEDIATE
+            'ALTER SEQUENCE IA_CLASSIFICACAO_ID_SEQ INCREMENT BY ' || v_incremento;
+
         SELECT IA_CLASSIFICACAO_ID_SEQ.NEXTVAL
         INTO v_proximo_id
         FROM DUAL;
 
-        EXIT WHEN v_proximo_id > v_maior_id;
-    END LOOP;
+        EXECUTE IMMEDIATE
+            'ALTER SEQUENCE IA_CLASSIFICACAO_ID_SEQ INCREMENT BY 1';
+    END IF;
 
     DBMS_OUTPUT.PUT_LINE(
-        'Sequence sincronizada. Proximo ID disponivel: ' || (v_proximo_id + 1)
+        'Sequence sincronizada. Proximo ID disponivel: ' || v_proximo_id
     );
 END;
 /
