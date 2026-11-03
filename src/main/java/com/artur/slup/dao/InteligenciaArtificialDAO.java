@@ -64,35 +64,66 @@ public class InteligenciaArtificialDAO implements IInteligenciaArtificialDAO {
     }
 
     @Override
+    public boolean verificarTabelaHistorico() {
+        String sql = "SELECT COUNT(*) FROM USER_TABLES WHERE TABLE_NAME = 'IA_CLASSIFICACAO'";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException erro) {
+            throw new RuntimeException("Erro ao verificar a tabela de historico da IA.", erro);
+        }
+    }
+
+    @Override
     public void salvarClassificacoes(List<ClassificacaoIA> classificacoes, String versaoModelo) {
-        if (classificacoes == null || classificacoes.isEmpty()) {
+        salvarResultados(classificacoes, "KMEANS", versaoModelo);
+    }
+
+    @Override
+    public void salvarResultados(List<ClassificacaoIA> resultados, String modelo, String versaoModelo) {
+        if (resultados == null || resultados.isEmpty()) {
             return;
         }
 
         String sql = "INSERT INTO IA_CLASSIFICACAO "
-                + "(ID_USUARIO, MODELO, PERFIL_PREVISTO, CLUSTER_ID, "
-                + "MISSOES_RECICLAGEM, MISSOES_MOBILIDADE, MISSOES_AGUA, "
-                + "MISSOES_ENERGIA, MISSOES_NATUREZA, MISSOES_CONSUMO, "
-                + "TAXA_CONCLUSAO, VERSAO_MODELO) "
-                + "VALUES (?, 'KMEANS', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "(ID_USUARIO, MODELO, PERFIL_PREVISTO, CLUSTER_ID, CONFIANCA, PONTOS_ESTIMADOS, "
+                + "MISSOES_RECICLAGEM, MISSOES_MOBILIDADE, MISSOES_AGUA, MISSOES_ENERGIA, "
+                + "MISSOES_NATUREZA, MISSOES_CONSUMO, TAXA_CONCLUSAO, VERSAO_MODELO) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
             try {
-                for (ClassificacaoIA classificacao : classificacoes) {
-                    CaracteristicasIA dados = classificacao.getCaracteristicas();
-                    statement.setInt(1, classificacao.getIdUsuario());
-                    statement.setString(2, classificacao.getPerfilPrevisto());
-                    statement.setInt(3, classificacao.getClusterId());
-                    statement.setInt(4, dados.getMissoesReciclagem());
-                    statement.setInt(5, dados.getMissoesMobilidade());
-                    statement.setInt(6, dados.getMissoesAgua());
-                    statement.setInt(7, dados.getMissoesEnergia());
-                    statement.setInt(8, dados.getMissoesNatureza());
-                    statement.setInt(9, dados.getMissoesConsumo());
-                    statement.setDouble(10, dados.getTaxaConclusao());
-                    statement.setString(11, versaoModelo);
+                for (ClassificacaoIA resultado : resultados) {
+                    CaracteristicasIA dados = resultado.getCaracteristicas();
+                    statement.setInt(1, resultado.getIdUsuario());
+                    statement.setString(2, modelo);
+                    statement.setString(3, resultado.getPerfilPrevisto());
+                    if (resultado.getClusterId() >= 0) {
+                        statement.setInt(4, resultado.getClusterId());
+                    } else {
+                        statement.setNull(4, java.sql.Types.NUMERIC);
+                    }
+                    if (resultado.getConfianca() == null) {
+                        statement.setNull(5, java.sql.Types.NUMERIC);
+                    } else {
+                        statement.setDouble(5, resultado.getConfianca());
+                    }
+                    if (resultado.getPontosEstimados() == null) {
+                        statement.setNull(6, java.sql.Types.NUMERIC);
+                    } else {
+                        statement.setDouble(6, resultado.getPontosEstimados());
+                    }
+                    statement.setInt(7, dados.getMissoesReciclagem());
+                    statement.setInt(8, dados.getMissoesMobilidade());
+                    statement.setInt(9, dados.getMissoesAgua());
+                    statement.setInt(10, dados.getMissoesEnergia());
+                    statement.setInt(11, dados.getMissoesNatureza());
+                    statement.setInt(12, dados.getMissoesConsumo());
+                    statement.setDouble(13, dados.getTaxaConclusao());
+                    statement.setString(14, versaoModelo);
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -104,7 +135,7 @@ public class InteligenciaArtificialDAO implements IInteligenciaArtificialDAO {
                 connection.setAutoCommit(true);
             }
         } catch (SQLException erro) {
-            throw new RuntimeException("Erro ao salvar classificacoes da IA.", erro);
+            throw new RuntimeException("Erro ao salvar resultados dos modelos de IA.", erro);
         }
     }
 }

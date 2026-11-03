@@ -7,6 +7,7 @@ import com.artur.slup.dto.GrupoIA;
 import com.artur.slup.dto.ResultadoAgrupamentoIA;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -21,14 +22,57 @@ public class InteligenciaArtificialService {
     private final IInteligenciaArtificialDAO iaDAO;
     private final RestClient restClient;
     private final String versaoModelo;
+    private final boolean apiIaConfigurada;
 
     public InteligenciaArtificialService(
             IInteligenciaArtificialDAO iaDAO,
-            @Value("${soulup.ia.url:http://localhost:5000}") String urlIA,
+            @Value("${soulup.ia.url:${IA_API_URL:}}") String urlIA,
             @Value("${soulup.ia.versao:1.0}") String versaoModelo) {
         this.iaDAO = iaDAO;
-        this.restClient = RestClient.builder().baseUrl(urlIA).build();
         this.versaoModelo = versaoModelo;
+        this.apiIaConfigurada = urlIA != null && !urlIA.isBlank();
+
+        String urlEfetiva = apiIaConfigurada ? urlIA.trim() : "http://localhost:5000";
+
+        // O Render Free pode levar cerca de um minuto para reativar uma instância
+        // suspensa. O timeout de resposta precisa comportar esse cold start.
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(10_000);
+        requestFactory.setReadTimeout(75_000);
+
+        this.restClient = RestClient.builder()
+                .baseUrl(urlEfetiva)
+                .requestFactory(requestFactory)
+                .build();
+    }
+
+    public Map<String, Object> verificarIntegracao() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("api_ia_configurada", apiIaConfigurada);
+
+        try {
+            Map<?, ?> resposta = restClient.get().uri("/").retrieve().body(Map.class);
+            status.put("api_ia_disponivel", resposta != null
+                    && "disponível".equals(resposta.get("status")));
+            status.put("modelos_carregados", resposta != null
+                    && resposta.get("modelos") instanceof List<?> modelos
+                    && !modelos.isEmpty());
+            status.put("modelos", resposta == null ? Map.of() : resposta);
+        } catch (RuntimeException erro) {
+            status.put("api_ia_disponivel", false);
+            status.put("modelos_carregados", false);
+            status.put("erro_api_ia",
+                    "Falha ao consultar a API de IA (" + erro.getClass().getSimpleName() + ").");
+        }
+
+        try {
+            status.put("tabela_historico_disponivel", iaDAO.verificarTabelaHistorico());
+        } catch (RuntimeException erro) {
+            status.put("tabela_historico_disponivel", false);
+            status.put("erro_banco", "Nao foi possivel verificar a tabela de historico.");
+        }
+
+        return status;
     }
 
     public ResultadoAgrupamentoIA agruparUsuarios() {
@@ -91,6 +135,88 @@ public class InteligenciaArtificialService {
 
         iaDAO.salvarClassificacoes(classificacoes, versaoModelo);
         return new ResultadoAgrupamentoIA(usuarios.size(), grupos, "KMeans", versaoModelo);
+    }
+
+    public Map<String, Object> executarModelosIndividuais() {
+        List<CaracteristicasIA> usuarios = iaDAO.listarCaracteristicasUsuarios();
+        List<ClassificacaoIA> classificacoes = new ArrayList<>();
+        List<ClassificacaoIA> estimativas = new ArrayList<>();
+
+        for (CaracteristicasIA usuario : usuarios) {
+            Map<String, Object> dadosPerfil = montarEntrada(usuario, false);
+            Map<?, ?> respostaPerfil = chamarModelo("/predict/perfil", dadosPerfil);
+            String perfil = String.valueOf(respostaPerfil.get("perfil_previsto"));
+            Object probabilidadesObjeto = respostaPerfil.get("probabilidades");
+            double confianca = 0;
+            if (probabilidadesObjeto instanceof Map<?, ?> probabilidades) {
+                for (Object valor : probabilidades.values()) {
+                    if (valor instanceof Number numero && numero.doubleValue() > confianca) {
+                        confianca = numero.doubleValue();
+                    }
+                }
+            }
+
+            ClassificacaoIA classificacao = new ClassificacaoIA();
+            classificacao.setIdUsuario(usuario.getIdUsuario());
+            classificacao.setClusterId(-1);
+            classificacao.setPerfilPrevisto(perfil);
+            classificacao.setConfianca(confianca);
+            classificacao.setCaracteristicas(usuario);
+            classificacoes.add(classificacao);
+
+            Map<?, ?> respostaPontos = chamarModelo("/predict/pontos", montarEntrada(usuario, true));
+            Object pontosObjeto = respostaPontos.get("pontos_estimados");
+            if (!(pontosObjeto instanceof Number pontos)) {
+                throw new IllegalStateException("A API de IA retornou uma estimativa de pontos inválida.");
+            }
+
+            ClassificacaoIA estimativa = new ClassificacaoIA();
+            estimativa.setIdUsuario(usuario.getIdUsuario());
+            estimativa.setClusterId(-1);
+            estimativa.setPontosEstimados(pontos.doubleValue());
+            estimativa.setCaracteristicas(usuario);
+            estimativas.add(estimativa);
+        }
+
+        iaDAO.salvarResultados(classificacoes, "RANDOM_FOREST", versaoModelo);
+        iaDAO.salvarResultados(estimativas, "LINEAR_REGRESSION", versaoModelo);
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("total_usuarios", usuarios.size());
+        resultado.put("classificacoes_random_forest", classificacoes.size());
+        resultado.put("estimativas_regressao", estimativas.size());
+        resultado.put("modelo_classificacao", "RandomForestClassifier");
+        resultado.put("modelo_regressao", "LinearRegression");
+        resultado.put("aviso_regressao", "Estimativas experimentais; não alteram a pontuação oficial.");
+        resultado.put("versao_modelo", versaoModelo);
+        return resultado;
+    }
+
+    private Map<String, Object> montarEntrada(CaracteristicasIA usuario, boolean incluirTaxa) {
+        Map<String, Object> entrada = new HashMap<>();
+        entrada.put("missoes_reciclagem", usuario.getMissoesReciclagem());
+        entrada.put("missoes_mobilidade", usuario.getMissoesMobilidade());
+        entrada.put("missoes_agua", usuario.getMissoesAgua());
+        entrada.put("missoes_energia", usuario.getMissoesEnergia());
+        entrada.put("missoes_natureza", usuario.getMissoesNatureza());
+        entrada.put("missoes_consumo", usuario.getMissoesConsumo());
+        if (incluirTaxa) {
+            entrada.put("taxa_conclusao", usuario.getTaxaConclusao());
+        }
+        return entrada;
+    }
+
+    private Map<?, ?> chamarModelo(String caminho, Map<String, Object> entrada) {
+        Map<?, ?> resposta = restClient.post()
+                .uri(caminho)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(entrada)
+                .retrieve()
+                .body(Map.class);
+        if (resposta == null) {
+            throw new IllegalStateException("A API de IA não retornou dados para " + caminho + ".");
+        }
+        return resposta;
     }
 
     private CaracteristicasIA localizarUsuario(List<CaracteristicasIA> usuarios, int idUsuario) {

@@ -53,8 +53,15 @@ public class UsuarioController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<RankingItem>> listarRankingGlobal() {
-        return ResponseEntity.ok(usuarioDAO.listarRankingGlobal());
+    public ResponseEntity<?> listarRanking(@RequestParam(required = false) String categoria) {
+        try {
+            if (categoria == null || categoria.isBlank() || "GLOBAL".equalsIgnoreCase(categoria)) {
+                return ResponseEntity.ok(usuarioDAO.listarRankingGlobal());
+            }
+            return ResponseEntity.ok(usuarioDAO.listarRankingPorCategoria(categoria.toUpperCase()));
+        } catch (IllegalArgumentException erro) {
+            return ResponseEntity.badRequest().body(Map.of("erro", erro.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
