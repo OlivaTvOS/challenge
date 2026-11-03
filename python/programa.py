@@ -223,7 +223,7 @@ def consultar_clima():
 
 
 def consultar_relatorios_oracle():
-    """Consulta os cinco relatórios SQL definidos para a Sprint 4."""
+    """Consulta os quatro relatórios SQL definidos para a Sprint 4."""
     try:
         resultados = api_oracle.listar_consultas()
     except RuntimeError as erro:
@@ -304,76 +304,75 @@ def menu_usuario():
         opcao = ler_numero("Escolha: ")
         if opcao is None:
             continue
-        match opcao:
-            case 0:
-                # A sessão termina sem remover a conta do banco.
+        if opcao == 0:
+            # A sessão termina sem remover a conta do banco.
+            sessao_usuario = None
+            print("Logout realizado com sucesso.")
+        elif opcao == 1:
+            # O perfil traz os pontos persistidos após a conclusão das missões.
+            try:
+                perfil = api_java.buscar_perfil(sessao_usuario["id"])
+                if perfil is None or "id" not in perfil:
+                    print("A API Java retornou os dados do perfil em formato inválido.")
+                    continue
+                print(
+                    f"\nNome de usuário: {perfil['nomeUsuario']}"
+                    f"\nNome completo: {perfil['nomeCompleto']}"
+                    f"\nE-mail: {perfil['email']}"
+                    f"\nPontos: {perfil['pontos']}"
+                )
+            except RuntimeError as erro:
+                print(erro)
+        elif opcao == 2:
+            nome_atual = sessao_usuario["nomeUsuario"]
+            nome_usuario = input(f"Nome de usuário ({nome_atual}): ").strip()
+            if not nome_usuario:
+                nome_usuario = nome_atual
+            nome = input("Nome completo: ")
+            email = input("E-mail: ")
+            senha = input("Nova senha: ")
+            try:
+                # A API valida duplicidade sem bloquear os dados da própria conta.
+                id_usuario = sessao_usuario["id"]
+                api_java.atualizar_perfil(
+                    id_usuario,
+                    nome_usuario,
+                    nome,
+                    email,
+                    senha,
+                )
+                perfil_atualizado = api_java.buscar_perfil(id_usuario)
+                if perfil_atualizado is None or "id" not in perfil_atualizado:
+                    print("A API Java retornou os dados do perfil em formato inválido.")
+                    continue
+                sessao_usuario = perfil_atualizado
+                print("Dados do perfil atualizados com sucesso.")
+            except RuntimeError as erro:
+                print(erro)
+        elif opcao == 3:
+            # A senha é verificada pela API antes de excluir a conta.
+            senha = input("Senha para excluir o perfil: ")
+            try:
+                resposta = api_java.remover_perfil(sessao_usuario["id"], senha)
+                if resposta is None or "message" not in resposta:
+                    print("A API Java retornou uma resposta inválida.")
+                    continue
+                print(resposta["message"])
                 sessao_usuario = None
-                print("Logout realizado com sucesso.")
-            case 1:
-                # O perfil traz os pontos persistidos após a conclusão das missões.
-                try:
-                    perfil = api_java.buscar_perfil(sessao_usuario["id"])
-                    if perfil is None or "id" not in perfil:
-                        print("A API Java retornou os dados do perfil em formato inválido.")
-                        continue
-                    print(
-                        f"\nNome de usuário: {perfil['nomeUsuario']}"
-                        f"\nNome completo: {perfil['nomeCompleto']}"
-                        f"\nE-mail: {perfil['email']}"
-                        f"\nPontos: {perfil['pontos']}"
-                    )
-                except RuntimeError as erro:
-                    print(erro)
-            case 2:
-                nome_atual = sessao_usuario["nomeUsuario"]
-                nome_usuario = input(f"Nome de usuário ({nome_atual}): ").strip()
-                if not nome_usuario:
-                    nome_usuario = nome_atual
-                nome = input("Nome completo: ")
-                email = input("E-mail: ")
-                senha = input("Nova senha: ")
-                try:
-                    # A API valida duplicidade sem bloquear os dados da própria conta.
-                    id_usuario = sessao_usuario["id"]
-                    api_java.atualizar_perfil(
-                        id_usuario,
-                        nome_usuario,
-                        nome,
-                        email,
-                        senha,
-                    )
-                    perfil_atualizado = api_java.buscar_perfil(id_usuario)
-                    if perfil_atualizado is None or "id" not in perfil_atualizado:
-                        print("A API Java retornou os dados do perfil em formato inválido.")
-                        continue
-                    sessao_usuario = perfil_atualizado
-                    print("Dados do perfil atualizados com sucesso.")
-                except RuntimeError as erro:
-                    print(erro)
-            case 3:
-                # A senha é verificada pela API antes de excluir a conta.
-                senha = input("Senha para excluir o perfil: ")
-                try:
-                    resposta = api_java.remover_perfil(sessao_usuario["id"], senha)
-                    if resposta is None or "message" not in resposta:
-                        print("A API Java retornou uma resposta inválida.")
-                        continue
-                    print(resposta["message"])
-                    sessao_usuario = None
-                except RuntimeError as erro:
-                    print(erro)
-            case 4:
-                realizar_missao_usuario()
-            case 5:
-                exibir_ranking()
-            case 6:
-                exportar_consultas_json()
-            case 7:
-                consultar_clima()
-            case 8:
-                consultar_relatorios_oracle()
-            case _:
-                print("Opção inexistente.")
+            except RuntimeError as erro:
+                print(erro)
+        elif opcao == 4:
+            realizar_missao_usuario()
+        elif opcao == 5:
+            exibir_ranking()
+        elif opcao == 6:
+            exportar_consultas_json()
+        elif opcao == 7:
+            consultar_clima()
+        elif opcao == 8:
+            consultar_relatorios_oracle()
+        else:
+            print("Opção inexistente.")
 
 
 def menu_principal():
@@ -385,19 +384,18 @@ def menu_principal():
         opcao = ler_numero("Escolha: ")
         if opcao is None:
             continue
-        match opcao:
-            case 0:
-                print("Encerrando")
-                rodando = False
-            case 1:
-                if sessao_usuario:
-                    print("Faça logout antes de criar outro perfil.")
-                else:
-                    cadastrar_usuario()
-            case 2:
-                entrar_usuario()
-            case _:
-                print("Opção inexistente.")
+        if opcao == 0:
+            print("Encerrando")
+            rodando = False
+        elif opcao == 1:
+            if sessao_usuario:
+                print("Faça logout antes de criar outro perfil.")
+            else:
+                cadastrar_usuario()
+        elif opcao == 2:
+            entrar_usuario()
+        else:
+            print("Opção inexistente.")
 
 
 if __name__ == "__main__":
