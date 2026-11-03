@@ -7,6 +7,7 @@ import com.artur.slup.dto.GrupoIA;
 import com.artur.slup.dto.ResultadoAgrupamentoIA;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -21,19 +22,33 @@ public class InteligenciaArtificialService {
     private final IInteligenciaArtificialDAO iaDAO;
     private final RestClient restClient;
     private final String versaoModelo;
+    private final boolean apiIaConfigurada;
 
     public InteligenciaArtificialService(
             IInteligenciaArtificialDAO iaDAO,
-            @Value("${soulup.ia.url:${IA_API_URL:http://localhost:5000}}") String urlIA,
+            @Value("${soulup.ia.url:${IA_API_URL:}}") String urlIA,
             @Value("${soulup.ia.versao:1.0}") String versaoModelo) {
         this.iaDAO = iaDAO;
-        this.restClient = RestClient.builder().baseUrl(urlIA).build();
         this.versaoModelo = versaoModelo;
+        this.apiIaConfigurada = urlIA != null && !urlIA.isBlank();
+
+        String urlEfetiva = apiIaConfigurada ? urlIA.trim() : "http://localhost:5000";
+
+        // O Render Free pode levar cerca de um minuto para reativar uma instância
+        // suspensa. O timeout de resposta precisa comportar esse cold start.
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(10_000);
+        requestFactory.setReadTimeout(75_000);
+
+        this.restClient = RestClient.builder()
+                .baseUrl(urlEfetiva)
+                .requestFactory(requestFactory)
+                .build();
     }
 
     public Map<String, Object> verificarIntegracao() {
         Map<String, Object> status = new HashMap<>();
-        status.put("api_ia_configurada", true);
+        status.put("api_ia_configurada", apiIaConfigurada);
 
         try {
             Map<?, ?> resposta = restClient.get().uri("/").retrieve().body(Map.class);
@@ -45,7 +60,9 @@ public class InteligenciaArtificialService {
             status.put("modelos", resposta == null ? Map.of() : resposta);
         } catch (RuntimeException erro) {
             status.put("api_ia_disponivel", false);
-            status.put("erro_api_ia", "Nao foi possivel consultar a API de IA.");
+            status.put("modelos_carregados", false);
+            status.put("erro_api_ia",
+                    "Falha ao consultar a API de IA (" + erro.getClass().getSimpleName() + ").");
         }
 
         try {
