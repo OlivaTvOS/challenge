@@ -1,89 +1,232 @@
-# Kairós — SoulUp Front-End
+# Kairós — SoulUp | Front-End Design Engineering
 
-Aplicação acadêmica para o SoulUp que usa missões, pontos e ranking para incentivar ações sustentáveis. O front-end é uma SPA em React, Vite e TypeScript e consome a API Java para contas, missões e ranking global.
+Aplicação acadêmica do projeto **Kairós / SoulUp**, desenvolvida como uma **Single Page Application (SPA)** com React, Vite e TypeScript. A plataforma apresenta a proposta do projeto e oferece fluxos funcionais de conta, perfil, missões e ranking, consumindo a API Java para operações de dados.
+
+**Challenge 2026 | Sprint 3 e Sprint 4 — Front-End Design Engineering**
+
+---
+
+## Acesso ao projeto
+
+| Recurso | Link |
+|---|---|
+| Aplicação publicada (Vercel) | https://soulup-frontend.vercel.app/ |
+| Repositório GitHub | https://github.com/OlivaTvOS/challenge |
+| Vídeo de demonstração (YouTube) | https://www.youtube.com/watch?v=0DQCjMSNQn8 |
+| API Java (Render) | https://soulup-java-api.onrender.com |
+
+---
+
+## Objetivo e escopo
+
+O Front-end do Kairós é uma Single Page Application (SPA) desenvolvida com React, Vite e TypeScript. A aplicação apresenta a proposta do projeto e oferece fluxos funcionais de conta, perfil, missões e ranking, consumindo a API Java para operações de dados.
+
+A Sprint 3 exigiu a refatoração das páginas anteriores, contemplando React, componentização, navegação interna e formulários. Na Sprint 4, o escopo evoluiu para integração com API Java, rotas estáticas e dinâmicas, publicação e demonstração do funcionamento.
 
 ## Tecnologias utilizadas
 
-- React 18, Vite e TypeScript
-- Tailwind CSS
-- React Router DOM
-- React Hook Form
-- ESLint
+| Tecnologia | Papel |
+|---|---|
+| React 18 | Composição da interface por componentes. |
+| Vite | Servidor de desenvolvimento e build da aplicação. |
+| TypeScript | Tipagem de dados, interfaces e contratos utilizados na interface. |
+| Tailwind CSS | Estilização e adaptação responsiva. |
+| React Router DOM | Navegação SPA, rotas estáticas/dinâmicas e proteção de páginas. |
+| React Hook Form | Gerenciamento e validação de formulários. |
+| Fetch API | Comunicação HTTP com a API Java. |
+| Context API | Compartilhamento do estado da aplicação e dados de sessão. |
 
-## Funcionalidades
+## Funcionalidades e páginas
 
-- Home, Sobre, Solução, FAQ, Contato e Integrantes
-- Cadastro, login, perfil e exclusão de usuário
-- Catálogo de missões, rota dinâmica por ID, início, conclusão e pontos
-- Ranking de usuários
-- Ranking global por pontos
-- Áreas de ranking por foco sustentável preparadas para futura integração com a API de classificação
+| Página / área | Conteúdo ou função |
+|---|---|
+| Home | Apresentação da solução e navegação principal. |
+| Sobre | Contexto e informações institucionais do projeto. |
+| Solução | Explicação da proposta Kairós/SoulUp. |
+| FAQ | Perguntas frequentes. |
+| Contato | Informações de contato. |
+| Integrantes | Identificação da equipe e links de perfil. |
+| Cadastro e Login | Criação de conta e autenticação pela API Java. |
+| Perfil | Consulta, atualização e exclusão de conta. |
+| Missões | Catálogo, detalhes, início e conclusão por usuário. |
+| Ranking | Exibição do ranking geral carregado pela API Java. |
 
-## Estrutura de pastas
+As rotas incluem os caminhos obrigatórios fixos e rotas de aplicação que recebem identificadores, como a rota de detalhe de missão. As páginas funcionais de missões, perfil e ranking ampliam a navegação para além das páginas institucionais exigidas.
+
+## Demonstração visual
+
+As imagens abaixo foram preservadas do documento de entrega Front-End Design Engineering.
+
+### Navegação e páginas
+
+![Página inicial do SoulUp](assets/demonstracao/01-home.png)
+
+### Categorias de missões
+
+![Categorias de missões](assets/demonstracao/02-categorias-missoes.png)
+
+### Cadastro de usuário
+
+![Tela de cadastro](assets/demonstracao/03-cadastro.png)
+
+### Login
+
+![Tela de login](assets/demonstracao/04-login.png)
+
+### Ranking global
+
+![Ranking global](assets/demonstracao/05-ranking-global.png)
+
+### Catálogo de missões
+
+![Catálogo de missões](assets/demonstracao/06-catalogo-missoes.png)
+
+### Ranking por categoria
+
+![Ranking por categoria](assets/demonstracao/07-ranking-categoria.png)
+
+### Perfil e responsividade
+
+![Perfil em visualização responsiva](assets/demonstracao/08-perfil-responsivo.png)
+
+---
+
+## Organização do código
 
 ```text
 src/
-  components/   componentes reutilizáveis de layout, interface e missões
-  context/      estado compartilhado da aplicação
-  data/         categorias e integrante
-  pages/        componentes de página
-  routes/       rotas estáticas, dinâmicas e proteções
-  services/     chamadas HTTP para as APIs
-  types/        tipos e interfaces TypeScript
+├── components/   # Componentes reutilizáveis de layout, interface e missões
+├── context/      # Estado compartilhado, provider e sessão do usuário
+├── data/         # Categorias e dados de apresentação de integrantes
+├── pages/        # Páginas institucionais e funcionais
+├── routes/       # Rotas da SPA e proteção de páginas
+├── services/     # Funções de comunicação HTTP com o backend
+└── types/        # Tipos e interfaces TypeScript
 ```
 
-O catálogo de missões é carregado do backend. Ao iniciar, a API cria as seis categorias e as 30 missões padrão somente quando necessário. O ranking global também é carregado da API Java; os rankings por foco aguardam um contrato de ranking na API de classificação.
+A arquitetura reduz duplicação de interface e separa apresentação, estado, navegação e comunicação com os serviços. O serviço HTTP concentra chamadas à API Java; o Context API compartilha dados necessários entre páginas e componentes.
+
+## Integração com a API Java
+
+O Front-end consome a API Java para:
+
+- Cadastro e login;
+- Consulta, atualização e exclusão de perfil;
+- Catálogo de missões;
+- Início e conclusão de missões;
+- Consulta do ranking global.
+
+### Desenvolvimento
+
+O Vite encaminha chamadas feitas pelo prefixo `/api` para `http://localhost:8080`, removendo o prefixo antes de encaminhar a requisição.
+
+### Produção
+
+A aplicação publicada utiliza a API Java hospedada no Render. O arquivo `vercel.json` contém as regras de encaminhamento das chamadas `/api` para a API Java e o fallback necessário para suportar rotas da SPA em acesso direto. O backend precisa permitir a origem do domínio Vercel em `APP_CORS_ALLOWED_ORIGINS`.
+
+**API Java:** https://soulup-java-api.onrender.com
+
+## Rotas e navegação
+
+A aplicação usa React Router DOM para rotas fixas e rotas com parâmetros variáveis. A passagem de identificador permite reutilizar o mesmo componente de detalhe para missões distintas.
+
+Rotas protegidas verificam a disponibilidade dos dados de sessão no estado do aplicativo antes de renderizar conteúdos que dependem de conta autenticada. O estado do usuário pode ser recuperado do armazenamento do navegador para manter a continuidade visual após atualização da página.
+
+## Responsividade e experiência
+
+O projeto utiliza classes responsivas do Tailwind para reorganizar menus, cards, grids e formulários.
+
+Faixas de referência indicadas no enunciado:
+
+- **Dispositivos móveis:** até 480 px;
+- **Tablets:** em torno de 768 px;
+- **Desktops:** a partir de 992 px.
 
 ## Como executar localmente
 
-1. Instale o Node.js.
-2. Abra um terminal na pasta do projeto.
-3. Execute `npm install`.
-4. Execute `npm run dev`.
-5. Abra o endereço informado pelo Vite.
+### Pré-requisitos
 
-Validação: `npm run lint` e `npm run build`.
+- Node.js em versão compatível com as dependências do projeto;
+- npm;
+- API Java disponível localmente na porta `8080`, quando utilizar o proxy de desenvolvimento.
 
-## Responsividade
+### Instalação e execução
 
-O layout usa Tailwind e foi estruturado para celular até 480 px, tablet a partir de 768 px e desktop a partir de 992 px. Menus, grids, formulários e cards reorganizam seu tamanho e quantidade de colunas conforme a tela.
+Na pasta que contém o `package.json`, execute:
 
-## Integrante e créditos
+```bash
+npm install
+npm run dev
+```
 
-- Artur Silva Oliveira — RM 569870 — 1º ADS / TDSPI
-- GitHub: https://github.com/OlivaTvOS
-- LinkedIn: www.linkedin.com/in/artur-silva-oliveira
-- Foto: [inserir arquivo da foto em `public/integrantes` antes da entrega]
+Abra no navegador a URL informada pelo Vite.
 
-## Links da entrega
+Para executar a API Java localmente, é necessário baixar o projeto Java no GitHub e executá-lo. Nesse cenário, o proxy de desenvolvimento encaminha as chamadas `/api` para `http://localhost:8080`.
 
-- Repositório público no GitHub: [inserir URL final]
-- Vídeo público no YouTube: [inserir URL final]
+### Verificações e build
 
-## Contato
+```bash
+npm run lint
+npm run build
+```
 
-- GitHub da equipe: https://github.com/OlivaTvOS
+Para visualizar localmente a versão de produção gerada:
 
-## Integração de classificação
+```bash
+npm run preview
+```
 
-A API Python atual expõe previsões de cluster e aprovação de missão. Ela ainda não fornece dados nem endpoints de ranking por foco; por isso, o front-end mantém essas opções identificadas como futuras e não simula posições ou pontuações.
+### Publicação
 
-## Registro de apoio de IA
+Na Vercel, a aplicação é publicada com o encaminhamento das chamadas à API Java e o fallback de rotas configurados em `vercel.json`.
 
-Ferramentas de IA foram usadas como apoio na revisão de requisitos, organização de etapas para desenvolvimento.
+- Front-end: https://soulup-frontend.vercel.app/
+- API Java: https://soulup-java-api.onrender.com
 
-## PROMPTS USADOS:
+## Estado de validação
 
-### PROMPT 1:
+Os fluxos principais do Front-end foram confirmados em funcionamento integrado com a API Java publicada.
 
-ANALISE MINHA IDEIA APRESENTADA E VEJA SE É COERENTE COM O PRAZO DE 1 MÊS E MEIO PARA ENTREGA CONSIDERANDO A DIFERENÇA ENTRE AS LINGUAGENS JAVA (COM BANCO), PYTHON (SEM BANCO) E FRONT-END QUE NÃO PODE TER CONSUMO DE API POR ENQUANTO.
-UMA VEZ QUE ANALISE, ME RETORNE QUANTO TEMPO EM MÉDIA DEVO GASTAR NO DESENVOLVIMENTO DE CADA UMA DELAS 
+O ranking global por pontuação é consumido da API Java.
 
-### PROMPT 2:
+## Uso de ferramentas de Inteligência Artificial
 
-ANALISE MINHA PROPOSTA DE ZERO TRUST ARCHITECTURE PARA O PROJETO E VEJA SE A IMPLEMENTAÇÃO DE MANEIRA MENOS ROBUSTA É VIÁVEL
+As ferramentas de IA foram utilizadas como apoio à análise das funções, das requisições realizadas pelo Front-end e da integração com a API Java (Spring Boot), além de apoiar a identificação de código que deixou de ser necessário após a integração com a API.
 
-### PROMPT 3:
+### Prompts utilizados
 
-FAÇA A ANÁLISE DE REQUISITOS DAS MATÉRIAS PARA QUE EU POSSA REALIZAR MINHA CONFERÊNCIA DOS DOCUMENTOS E DOS DADOS. 
-ANALISE QUAIS MATÉRIAS PEDEM VÍDEO E SUAS ESTRUTURAS.
+**PROMPT 1:**
+
+> Analise as funções e requisições para identificiar erros e possíveis chamadas erradas da API trazida de Java (Spring Boot), me atualize com os possíveis erros e possíveis melhorias no front-end.
+
+**PROMPT 2:**
+
+> Preciso refatorar esse código front-end limpando todas as funções/classes que não são mais necessárias e que antes da API, guardavam dados na memória apenas.
+
+## Integrante e contato
+
+### Artur da Silva de Oliveira
+
+![Foto de Artur da Silva de Oliveira](assets/integrante/artur-silva-oliveira.png)
+
+| Informação | Dado |
+|---|---|
+| RM | 569870 |
+| Curso / Turma | 1º ADS / TDSPI |
+| Equipe / Solução | Kairós / SoulUp |
+| GitHub | https://github.com/OlivaTvOS |
+| LinkedIn | https://www.linkedin.com/in/artur-silva-oliveira/ |
+
+## Autoria e créditos
+
+Projeto acadêmico desenvolvido para o **FIAP Challenge 2026**, nas entregas de Sprint 3 e Sprint 4, para a disciplina **Front-End Design Engineering**.
+
+- Integrante: Artur da Silva de Oliveira.
+- Solução: Kairós / SoulUp.
+- Repositório: https://github.com/OlivaTvOS/challenge.
+- Aplicação: https://soulup-frontend.vercel.app/.
+- Vídeo: https://www.youtube.com/watch?v=0DQCjMSNQn8.
+
+---
+
+**Kairós / SoulUp — Challenge 2026 | Front-End Design Engineering**
